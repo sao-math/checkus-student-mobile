@@ -29,7 +29,10 @@ jobs:
       - name: Build
         run: |
           npm run build
+          echo "=== Build directory contents ==="
           ls -la dist/
+          echo "=== index.html contents ==="
+          cat dist/index.html
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
