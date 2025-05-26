@@ -195,7 +195,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
                 "calendar-day", 
                 !day.isCurrentMonth && "text-gray-400",
                 getCompletionClass(day.completionRate),
-                selectedDate.toDateString() === day.date.toDateString() && "calendar-day-selected"
+                selectedDate.toDateString() === day.date.toDateString() && "!bg-primary !text-white border-2 border-primary"
               )}
               onClick={() => handleDateClick(day)}
             >
@@ -219,7 +219,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
                 className={cn(
                   "calendar-day", 
                   getCompletionClass(day.completionRate),
-                  selectedDate.toDateString() === day.date.toDateString() && "calendar-day-selected"
+                  selectedDate.toDateString() === day.date.toDateString() && "!bg-primary !text-white border-2 border-primary"
                 )}
                 onClick={() => handleDateClick(day)}
               >

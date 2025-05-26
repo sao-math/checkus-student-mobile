@@ -20,6 +20,7 @@ interface StudentFieldsProps {
   schoolOpen: boolean;
   setSchoolOpen: (open: boolean) => void;
   handleSchoolSelect: (school: string) => void;
+  readOnly?: boolean;
 }
 
 const StudentFields: React.FC<StudentFieldsProps> = ({
@@ -29,7 +30,78 @@ const StudentFields: React.FC<StudentFieldsProps> = ({
   schoolOpen,
   setSchoolOpen,
   handleSchoolSelect,
+  readOnly = false,
 }) => {
+  // 읽기 전용일 때 값을 한국어로 변환하는 함수들
+  const getGenderLabel = (gender?: string) => {
+    switch (gender) {
+      case "MALE": return "남자";
+      case "FEMALE": return "여자";
+      case "OTHER": return "기타";
+      default: return gender || "";
+    }
+  };
+
+  const getStatusLabel = (status?: string) => {
+    switch (status) {
+      case "INQUIRY": return "문의";
+      case "COUNSELING_SCHEDULED": return "상담예약";
+      case "ENROLLED": return "재원";
+      case "WAITING": return "대기";
+      case "WITHDRAWN": return "퇴원";
+      case "UNREGISTERED": return "미등록";
+      default: return status || "";
+    }
+  };
+
+  const getGradeLabel = (grade?: string) => {
+    switch (grade) {
+      case "중1": return "중학교 1학년";
+      case "중2": return "중학교 2학년";
+      case "중3": return "중학교 3학년";
+      case "고1": return "고등학교 1학년";
+      case "고2": return "고등학교 2학년";
+      case "고3": return "고등학교 3학년";
+      case "재수": return "재수생";
+      case "N수": return "N수생";
+      default: return grade || "";
+    }
+  };
+
+  if (readOnly) {
+    return (
+      <>
+        <div className="space-y-2">
+          <Label htmlFor="gender">성별</Label>
+          <div className="bg-gray-100 p-2 rounded-md text-gray-700">
+            {getGenderLabel(formData.gender)}
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="status">상태</Label>
+          <div className="bg-gray-100 p-2 rounded-md text-gray-700">
+            {getStatusLabel(formData.status)}
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="school">학교</Label>
+          <div className="bg-gray-100 p-2 rounded-md text-gray-700">
+            {formData.school || ""}
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="grade">학년</Label>
+          <div className="bg-gray-100 p-2 rounded-md text-gray-700">
+            {getGradeLabel(formData.grade)}
+          </div>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <div className="space-y-2">

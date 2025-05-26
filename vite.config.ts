@@ -4,11 +4,10 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }: { mode: string }) => ({
-  base: mode === 'production' ? '/checkus-student-mobile/' : '/',
+export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
-    port: 3001,
+    port: 8080,
   },
   plugins: [
     react(),

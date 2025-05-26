@@ -13,12 +13,14 @@ interface BasicInfoFieldsProps {
   };
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   fieldErrors: Record<string, string>;
+  readOnly?: boolean;
 }
 
 const BasicInfoFields: React.FC<BasicInfoFieldsProps> = ({
   formData,
   handleChange,
   fieldErrors,
+  readOnly = false,
 }) => {
   return (
     <>
@@ -30,6 +32,7 @@ const BasicInfoFields: React.FC<BasicInfoFieldsProps> = ({
         value={formData.name}
         onChange={handleChange}
         error={fieldErrors.name}
+        disabled={readOnly}
       />
 
       <InputWithLabel
@@ -50,6 +53,7 @@ const BasicInfoFields: React.FC<BasicInfoFieldsProps> = ({
         value={formData.phoneNumber}
         onChange={handleChange}
         error={fieldErrors.phoneNumber}
+        disabled={readOnly}
       />
       
       <InputWithLabel

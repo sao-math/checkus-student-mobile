@@ -1,70 +1,65 @@
 
-import React, { useState } from "react";
+import React from "react";
 import Header from "@/components/header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/components/ui/use-toast";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Copy, Check, X } from "lucide-react";
-
-// Mock data - in a real app, this would come from backend
-const mockStudentId = "student_hong123";
-const mockConnectionRequests = [
-  {
-    id: "req1",
-    requesterName: "김부모",
-    requesterId: "parent123",
-    relationshipType: "부모",
-    requestDate: "2025-05-07",
-    status: "pending"
-  },
-  {
-    id: "req2",
-    requesterName: "이선생님",
-    requesterId: "teacher456",
-    relationshipType: "선생님",
-    requestDate: "2025-05-06",
-    status: "pending"
-  }
-];
+import { 
+  useStudentId, 
+  useGuardianRequests, 
+  useApproveGuardianRequest, 
+  useRejectGuardianRequest 
+} from "@/hooks/useApi";
+import { useToast } from "@/components/ui/use-toast";
 
 const Settings = () => {
   const { toast } = useToast();
-  const [studentId] = useState(mockStudentId);
-  const [connectionRequests, setConnectionRequests] = useState(mockConnectionRequests);
+  
+  // API 훅 사용
+  const { data: studentIdData, isLoading: studentIdLoading } = useStudentId();
+  const { data: requests = [], isLoading: requestsLoading } = useGuardianRequests();
+  const approveMutation = useApproveGuardianRequest();
+  const rejectMutation = useRejectGuardianRequest();
 
   const handleCopyStudentId = () => {
-    navigator.clipboard.writeText(studentId);
-    toast({
-      title: "복사 완료",
-      description: "학생 ID가 클립보드에 복사되었습니다.",
-    });
+    if (studentIdData?.studentId) {
+      navigator.clipboard.writeText(studentIdData.studentId);
+      toast({
+        title: "복사 완료",
+        description: "학생 ID가 클립보드에 복사되었습니다.",
+      });
+    }
   };
 
   const handleRequestAction = (requestId: string, action: "approve" | "reject") => {
-    // In a real app, you would send this to your backend
-    setConnectionRequests(
-      connectionRequests.map((req) => 
-        req.id === requestId 
-          ? { ...req, status: action === "approve" ? "approved" : "rejected" } 
-          : req
-      )
-    );
-
-    toast({
-      title: action === "approve" ? "요청 승인됨" : "요청 거절됨",
-      description: action === "approve" 
-        ? "이제 해당 사용자가 귀하의 학습 정보를 볼 수 있습니다." 
-        : "연결 요청이 거절되었습니다."
-    });
+    if (action === "approve") {
+      approveMutation.mutate(requestId);
+    } else {
+      rejectMutation.mutate(requestId);
+    }
   };
 
   // Filter pending requests
-  const pendingRequests = connectionRequests.filter(req => req.status === "pending");
+  const pendingRequests = requests.filter(req => req.status === "pending");
   
   // Filter approved and rejected requests for history
-  const historyRequests = connectionRequests.filter(req => req.status !== "pending");
+  const historyRequests = requests.filter(req => req.status !== "pending");
+
+  if (studentIdLoading || requestsLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="container max-w-4xl mx-auto p-4 flex items-center justify-center min-h-96">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-gray-500">데이터를 불러오는 중...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -82,7 +77,7 @@ const Settings = () => {
             </p>
             <div className="flex items-center gap-2">
               <code className="bg-gray-100 px-3 py-1.5 rounded text-sm font-mono flex-1">
-                {studentId}
+                {studentIdData?.studentId || 'Loading...'}
               </code>
               <Button size="sm" variant="outline" onClick={handleCopyStudentId}>
                 <Copy className="h-4 w-4 mr-1" /> 복사
@@ -120,6 +115,7 @@ const Settings = () => {
                             size="sm" 
                             onClick={() => handleRequestAction(request.id, "approve")}
                             className="bg-green-600 hover:bg-green-700"
+                            disabled={approveMutation.isPending}
                           >
                             <Check className="h-4 w-4 mr-1" /> 승인
                           </Button>
@@ -128,6 +124,7 @@ const Settings = () => {
                             variant="outline" 
                             className="text-red-500 border-red-200 hover:bg-red-50"
                             onClick={() => handleRequestAction(request.id, "reject")}
+                            disabled={rejectMutation.isPending}
                           >
                             <X className="h-4 w-4 mr-1" /> 거부
                           </Button>

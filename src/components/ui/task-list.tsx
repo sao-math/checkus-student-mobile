@@ -1,43 +1,18 @@
-
 import React from "react";
 import { Clock, Book } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
-import { Progress, TimelineSegment } from "@/components/ui/progress";
-
-export interface Task {
-  id: string;
-  title: string;
-  description: string;
-  teacher: string;
-  resourceType: "link" | "video";
-  resourceUrl?: string;
-  videoWatchTime?: number;
-  isCompleted: boolean;
-  dueTime?: string;
-}
-
-export interface StudyTime {
-  id: string;
-  subject: string;
-  startTime: string;
-  endTime: string;
-  isActive: boolean;
-  progressPercent: number;
-  // New field for timeline visualization
-  timeline?: TimelineSegment[];
-  // New field to show total connected time in minutes
-  totalConnectedMinutes?: number;
-}
+import { Progress } from "@/components/ui/progress";
+import { Task, StudyTimeWithActuals } from "@/types/api";
 
 interface TaskListProps {
   date: Date;
-  studyTimes: StudyTime[];
+  studyTimes: StudyTimeWithActuals[];
   tasks: Task[];
   onTaskClick: (task: Task) => void;
   onTaskComplete: (taskId: string, isCompleted: boolean) => void;
-  onStudyTimeClick: (studyTime: StudyTime) => void;
+  onStudyTimeClick: (studyTime: StudyTimeWithActuals) => void;
   className?: string;
 }
 
@@ -57,6 +32,15 @@ const TaskList: React.FC<TaskListProps> = ({
     weekday: "long",
   });
 
+  // 시간 포맷팅 함수
+  const formatTime = (isoString: string) => {
+    return new Date(isoString).toLocaleTimeString("ko-KR", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true
+    });
+  };
+
   return (
     <div className={cn("space-y-6", className)}>
       <div className="text-lg font-medium">{formattedDate}</div>
@@ -70,19 +54,24 @@ const TaskList: React.FC<TaskListProps> = ({
         
         {studyTimes.length > 0 ? (
           <div className="space-y-2">
-            {studyTimes.map((time) => (
+            {studyTimes.map((studyTime) => (
               <div 
-                key={time.id}
+                key={studyTime.assigned.id}
                 className={cn(
                   "p-3 bg-white rounded-lg border shadow-sm cursor-pointer hover:bg-gray-50",
-                  time.isActive && "border-primary"
+                  studyTime.isActive && "border-primary"
                 )}
-                onClick={() => onStudyTimeClick(time)}
+                onClick={() => onStudyTimeClick(studyTime)}
               >
                 <div className="flex justify-between mb-2">
-                  <div className="font-medium">{time.subject}</div>
-                  <div className="text-sm text-gray-600">
-                    {time.startTime} - {time.endTime}
+                  <div>
+                    <div className="font-medium">{studyTime.assigned.activity?.name || "공부 시간"}</div>
+                  </div>
+                  <div className="text-sm text-gray-600 text-right">
+                    <div>{formatTime(studyTime.assigned.startTime)} - {formatTime(studyTime.assigned.endTime)}</div>
+                    {studyTime.isActive && (
+                      <div className="text-xs text-primary font-medium">진행 중</div>
+                    )}
                   </div>
                 </div>
                 
@@ -98,23 +87,17 @@ const TaskList: React.FC<TaskListProps> = ({
                         미접속
                       </span>
                     </div>
-                    {time.totalConnectedMinutes !== undefined && (
-                      <span className="text-primary font-medium">총 {time.totalConnectedMinutes}분 접속</span>
-                    )}
+                    <span className="text-primary font-medium">
+                      총 {studyTime.totalConnectedMinutes}분 접속 ({studyTime.progressPercent}%)
+                    </span>
                   </div>
                   
-                  {time.timeline ? (
-                    <Progress segments={time.timeline} className="h-2" />
-                  ) : (
-                    <Progress value={time.progressPercent} className="h-2" />
-                  )}
+                  <Progress segments={studyTime.timeline} className="h-2" />
                   
-                  {time.timeline && (
-                    <div className="flex justify-between text-xs text-gray-400 mt-1">
-                      <span>{time.startTime}</span>
-                      <span>{time.endTime}</span>
-                    </div>
-                  )}
+                  <div className="flex justify-between text-xs text-gray-400 mt-1">
+                    <span>{formatTime(studyTime.assigned.startTime)}</span>
+                    <span>{formatTime(studyTime.assigned.endTime)}</span>
+                  </div>
                 </div>
               </div>
             ))}
@@ -142,16 +125,31 @@ const TaskList: React.FC<TaskListProps> = ({
                 key={task.id}
                 className={cn(
                   "p-3 bg-white rounded-lg border shadow-sm flex justify-between items-center",
-                  task.isCompleted ? "task-complete" : ""
+                  task.isCompleted ? "bg-green-50 border-green-200" : ""
                 )}
               >
                 <div 
                   className="flex-1 cursor-pointer"
                   onClick={() => onTaskClick(task)}
                 >
-                  <div className="font-medium">{task.title}</div>
+                  <div className={cn(
+                    "font-medium",
+                    task.isCompleted && "line-through text-gray-500"
+                  )}>
+                    {task.title}
+                  </div>
                   {task.dueTime && (
-                    <div className="text-xs text-gray-500">{task.dueTime}까지</div>
+                    <div className={cn(
+                      "text-xs",
+                      task.isCompleted ? "text-gray-400" : "text-gray-500"
+                    )}>
+                      {task.dueTime}까지
+                    </div>
+                  )}
+                  {task.isCompleted && (
+                    <div className="text-xs text-green-600 mt-1">
+                      ✓ 완료됨
+                    </div>
                   )}
                 </div>
                 <Checkbox 

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Dialog,
@@ -12,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { ExternalLink, FileText, Upload, User, Video } from "lucide-react";
-import { Task } from "./task-list";
+import { Task } from "@/types/api";
 
 interface TaskModalProps {
   task: Task | null;

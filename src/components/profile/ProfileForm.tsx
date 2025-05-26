@@ -52,6 +52,9 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
   const [formData, setFormData] = useState<ProfileFormData>(initialData);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
+  // 학생인지 확인
+  const isStudent = formData.role === "student";
+
   // Example school list - in a real app, this would come from an API
   const schools = [
     "OO중학교",
@@ -65,20 +68,24 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
   ];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isStudent) return; // 학생은 수정 불가
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSelectChange = (name: string, value: string) => {
+    if (isStudent) return; // 학생은 수정 불가
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSchoolSelect = (school: string) => {
+    if (isStudent) return; // 학생은 수정 불가
     setFormData((prev) => ({ ...prev, school }));
     setSchoolOpen(false);
   };
 
   const handleRelationshipChange = (index: number, field: string, value: string) => {
+    if (isStudent) return; // 학생은 수정 불가
     if (formData.studentRelationships) {
       const updatedRelationships = [...formData.studentRelationships];
       updatedRelationships[index] = {
@@ -95,6 +102,8 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (isStudent) return; // 학생은 제출 불가
+    
     setLoading(true);
     
     try {
@@ -124,7 +133,9 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>내 정보 수정</CardTitle>
+        <CardTitle>
+          {isStudent ? "내 정보 확인" : "내 정보 수정"}
+        </CardTitle>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
@@ -132,6 +143,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
             formData={formData}
             handleChange={handleChange}
             fieldErrors={fieldErrors}
+            readOnly={isStudent}
           />
 
           {formData.role === "student" && (
@@ -142,6 +154,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
               schoolOpen={schoolOpen}
               setSchoolOpen={setSchoolOpen}
               handleSchoolSelect={handleSchoolSelect}
+              readOnly={isStudent}
             />
           )}
 
@@ -154,9 +167,16 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
         </CardContent>
 
         <CardFooter className="flex-col gap-3">
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "저장 중..." : "저장하기"}
-          </Button>
+          {!isStudent && (
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "저장 중..." : "저장하기"}
+            </Button>
+          )}
+          {isStudent && (
+            <div className="text-sm text-gray-500 text-center">
+              학생은 프로필 정보를 수정할 수 없습니다
+            </div>
+          )}
         </CardFooter>
       </form>
     </Card>
