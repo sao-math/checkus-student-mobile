@@ -1,13 +1,15 @@
-
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import InputWithLabel from "@/components/ui/input-with-label";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Eye, EyeOff, User, Lock } from "lucide-react";
 
 const Login = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -48,7 +50,7 @@ const Login = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>로그인</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center">로그인</CardTitle>
           </CardHeader>
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
@@ -58,25 +60,46 @@ const Login = () => {
                 </div>
               )}
 
-              <InputWithLabel
-                id="username"
-                name="username"
-                label="아이디"
-                placeholder="student_user"
-                value={formData.username}
-                onChange={handleChange}
-                required
-              />
+              <div className="space-y-2">
+                <Label htmlFor="username">아이디</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
+                  <Input
+                    id="username"
+                    name="username"
+                    type="text"
+                    placeholder="아이디를 입력하세요"
+                    value={formData.username}
+                    onChange={handleChange}
+                    className="pl-9"
+                    required
+                  />
+                </div>
+              </div>
 
-              <InputWithLabel
-                id="password"
-                name="password"
-                label="비밀번호"
-                type="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
+              <div className="space-y-2">
+                <Label htmlFor="password">비밀번호</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
+                  <Input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="비밀번호를 입력하세요"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="pl-9"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-2.5 text-gray-500"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
               
               <p className="text-xs text-gray-500 mt-1">
                 * 테스트: 학부모 로그인은 "parent"로 시작하는 아이디를 입력하세요
