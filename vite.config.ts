@@ -5,7 +5,7 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '/checkus-student-mobile/',
+  base: '/',
   server: {
     host: "::",
     port: 3002,
