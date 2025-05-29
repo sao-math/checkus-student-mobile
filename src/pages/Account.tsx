@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Header from "@/components/header";
@@ -13,31 +12,36 @@ import {
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
-
-// For demonstration purposes, check URL for role
-const isParent = (): boolean => {
-  if (typeof window !== 'undefined') {
-    return window.location.search.includes('role=parent');
-  }
-  return false;
-};
+import { useAuth } from "@/contexts/AuthContext";
 
 const Account = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const userIsParent = isParent();
+  const { user, logout } = useAuth();
 
-  const handleLogout = () => {
-    // In a real app, you'd perform actual logout
-    toast({
-      title: "로그아웃 되었습니다",
-      description: "다음에 또 만나요!",
-    });
-    
-    setTimeout(() => {
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast({
+        title: "로그아웃 되었습니다",
+        description: "다음에 또 만나요!",
+      });
       navigate("/login");
-    }, 1500);
+    } catch (error) {
+      toast({
+        title: "로그아웃 실패",
+        description: "다시 시도해주세요.",
+        variant: "destructive",
+      });
+    }
   };
+
+  if (!user) {
+    return null;
+  }
+
+  const userRole = user.roles[0]?.toLowerCase() || 'student';
+  const isParent = userRole === 'guardian';
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -53,10 +57,10 @@ const Account = () => {
                 <UserRound className="h-8 w-8 text-primary" />
               </div>
               <div>
-                <div className="font-medium text-lg">{userIsParent ? "김부모" : "홍길동"}</div>
-                <div className="text-sm text-gray-500">{userIsParent ? "parent_user" : "student_user"}</div>
+                <div className="font-medium text-lg">{user.name}</div>
+                <div className="text-sm text-gray-500">{user.username}</div>
                 <div className="text-xs bg-secondary/20 text-secondary px-2 py-0.5 rounded-full inline-block mt-1">
-                  {userIsParent ? "학부모" : "학생"}
+                  {userRole === 'student' ? '학생' : userRole === 'guardian' ? '학부모' : userRole}
                 </div>
               </div>
             </div>
@@ -69,7 +73,7 @@ const Account = () => {
           <Card>
             <CardContent className="p-0">
               <Link 
-                to={userIsParent ? "/profile-edit?role=parent" : "/profile-edit"} 
+                to={isParent ? "/profile-edit?role=parent" : "/profile-edit"} 
                 className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50"
               >
                 <div className="flex items-center gap-3">
@@ -94,7 +98,7 @@ const Account = () => {
               
               <Separator />
               
-              {!userIsParent && (
+              {!isParent && (
                 <Link 
                   to="/parent-connection" 
                   className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50"

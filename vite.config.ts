@@ -5,10 +5,18 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '/',
+  base: '/checkus-student-mobile/',
   server: {
     host: "::",
     port: 3002,
+    strictPort: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false,
+      }
+    }
   },
   plugins: [
     react(),
