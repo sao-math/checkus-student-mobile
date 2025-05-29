@@ -13,6 +13,16 @@ export interface LoginResponse {
   tokenType: string;
 }
 
+export interface UserInfo {
+  id: number;
+  username: string;
+  name: string;
+  phoneNumber: string | null;
+  discordId: string | null;
+  roles: string[];
+  createdAt: string | null;
+}
+
 export interface StudentRegisterRequest {
   username: string;
   password: string;
