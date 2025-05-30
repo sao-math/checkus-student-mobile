@@ -20,8 +20,8 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Router>
-          <AuthProvider>
+        <AuthProvider>
+          <Router>
             <Routes>
               {/* Public routes */}
               <Route path="/login" element={<Login />} />
@@ -40,8 +40,8 @@ function App() {
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Toaster />
-          </AuthProvider>
-        </Router>
+          </Router>
+        </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

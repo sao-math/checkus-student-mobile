@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import authService from '../services/auth';
 import { LoginRequest, LoginResponse, UserInfo } from '../types/auth';
 
@@ -17,7 +16,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<UserInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -68,7 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (userResponse.success && userResponse.data) {
           setIsAuthenticated(true);
           setUser(userResponse.data);
-          navigate('/dashboard');
+          window.location.href = '/dashboard';
         } else {
           throw new Error('Failed to verify user session');
         }
@@ -90,7 +88,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('refreshToken');
     setIsAuthenticated(false);
     setUser(null);
-    navigate('/login');
+    window.location.href = '/login';
   };
 
   return (
