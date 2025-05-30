@@ -1,7 +1,9 @@
 import axios from 'axios';
 
-const api = axios.create({
-  baseURL: 'http://localhost:8080/api',
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
+const axiosInstance = axios.create({
+  baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -9,7 +11,7 @@ const api = axios.create({
 });
 
 // Request interceptor
-api.interceptors.request.use(
+axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('accessToken');
     if (token) {
@@ -23,7 +25,7 @@ api.interceptors.request.use(
 );
 
 // Response interceptor
-api.interceptors.response.use(
+axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
@@ -42,14 +44,14 @@ api.interceptors.response.use(
           throw new Error('No refresh token available');
         }
 
-        const response = await api.post('/auth/refresh', { refreshToken });
+        const response = await axiosInstance.post('/auth/refresh', { refreshToken });
         const { accessToken, refreshToken: newRefreshToken } = response.data.data;
 
         localStorage.setItem('accessToken', accessToken);
         localStorage.setItem('refreshToken', newRefreshToken);
 
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-        return api(originalRequest);
+        return axiosInstance(originalRequest);
       } catch (refreshError) {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
@@ -62,4 +64,4 @@ api.interceptors.response.use(
   }
 );
 
-export default api; 
+export default axiosInstance; 
