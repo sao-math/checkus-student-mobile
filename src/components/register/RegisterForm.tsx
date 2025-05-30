@@ -1,10 +1,10 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import RegisterRoleSelection from "./RegisterRoleSelection";
 import RegisterFormFields from "./RegisterFormFields";
 import RegisterFooter from "./RegisterFooter";
+import authService from "@/services/auth";
 
 const RegisterForm = (props: any) => {
   const {
@@ -25,7 +25,7 @@ const RegisterForm = (props: any) => {
 
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const validationErrors = validate();
 
@@ -38,12 +38,43 @@ const RegisterForm = (props: any) => {
     setLoading(true);
     setError("");
 
-    // In a real app, you'd register the user
-    // For now, simply simulate a successful registration
-    setTimeout(() => {
+    try {
+      if (formData.role === "student") {
+        // Prepare payload for StudentRegisterRequest
+        const payload = {
+          username: formData.username,
+          password: formData.password,
+          name: formData.name,
+          phoneNumber: formData.phoneNumber,
+          discordId: formData.discordId || undefined,
+          schoolName: formData.school,
+          grade: parseInt(formData.grade) || 1,
+          gender: formData.gender,
+        };
+        const response = await authService.registerStudent(payload);
+        if (response.success) {
+          navigate("/login", {
+            state: {
+              message: "회원가입이 완료되었습니다. 로그인해주세요.",
+              from: "registration",
+            },
+          });
+        } else {
+          setError(response.message || "회원가입에 실패했습니다.");
+        }
+      } else {
+        // For other roles, just simulate
+        setTimeout(() => {
+          setLoading(false);
+          navigate("/login");
+        }, 1000);
+        return;
+      }
+    } catch (err: any) {
+      setError(err?.response?.data?.message || err.message || "회원가입에 실패했습니다.");
+    } finally {
       setLoading(false);
-      navigate("/login");
-    }, 1000);
+    }
   };
 
   return (
