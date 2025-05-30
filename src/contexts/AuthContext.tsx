@@ -35,14 +35,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } else {
           // Token is invalid, clear it
           localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
           setIsAuthenticated(false);
           setUser(null);
         }
       } catch (error) {
         // Token is invalid, clear it
         localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
         setIsAuthenticated(false);
         setUser(null);
       } finally {
@@ -57,10 +55,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const response = await authService.login(data);
       if (response.success && response.data) {
-        const { accessToken, refreshToken } = response.data;
+        const { accessToken } = response.data;
         localStorage.setItem('accessToken', accessToken);
-        localStorage.setItem('refreshToken', refreshToken);
-        
         // Verify the token by getting user info
         const userResponse = await authService.getCurrentUser();
         if (userResponse.success && userResponse.data) {
@@ -76,7 +72,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (error) {
       // Clear tokens if login fails
       localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
       setIsAuthenticated(false);
       setUser(null);
       throw error;
@@ -85,7 +80,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
     setIsAuthenticated(false);
     setUser(null);
     window.location.href = '/login';

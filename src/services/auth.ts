@@ -1,4 +1,4 @@
-import api from '../lib/axios';
+import axiosInstance from '../lib/axios';
 import {
   LoginRequest,
   LoginResponse,
@@ -8,46 +8,43 @@ import {
   TokenRefreshResponse,
   LogoutRequest,
   UserInfoResponse,
-  ResponseBase
+  ResponseBase,
+  UserInfo
 } from '../types/auth';
 
 const authService = {
   async login(request: LoginRequest): Promise<ResponseBase<LoginResponse>> {
-    const response = await api.post<ResponseBase<LoginResponse>>('/auth/login', request);
+    const response = await axiosInstance.post<ResponseBase<LoginResponse>>('/auth/login', request);
     return response.data;
   },
 
   async registerStudent(request: StudentRegisterRequest): Promise<ResponseBase<RegisterResponse>> {
-    const response = await api.post<ResponseBase<RegisterResponse>>('/auth/register/student', request);
+    const response = await axiosInstance.post<ResponseBase<null>>('/auth/register/student', request);
     return response.data;
   },
 
-  async refreshToken(request: TokenRefreshRequest): Promise<ResponseBase<TokenRefreshResponse>> {
-    const response = await api.post<ResponseBase<TokenRefreshResponse>>('/auth/refresh', request);
+  async refreshToken(): Promise<ResponseBase<{ accessToken: string }>> {
+    const response = await axiosInstance.post<ResponseBase<{ accessToken: string }>>('/auth/refresh');
     return response.data;
   },
 
-  async logout(request: LogoutRequest): Promise<ResponseBase<string>> {
-    const response = await api.post<ResponseBase<string>>('/auth/logout', request);
+  async logout(): Promise<ResponseBase<null>> {
+    const response = await axiosInstance.post<ResponseBase<null>>('/auth/logout');
     return response.data;
   },
 
-  async getCurrentUser(): Promise<ResponseBase<UserInfoResponse>> {
-    const response = await api.get<ResponseBase<UserInfoResponse>>('/auth/me');
+  async getCurrentUser(): Promise<ResponseBase<UserInfo>> {
+    const response = await axiosInstance.get<ResponseBase<UserInfo>>('/auth/me');
     return response.data;
   },
 
   async checkUsername(username: string): Promise<ResponseBase<boolean>> {
-    const response = await api.get<ResponseBase<boolean>>('/auth/check-username', {
-      params: { username }
-    });
+    const response = await axiosInstance.get<ResponseBase<boolean>>(`/auth/check-username?username=${username}`);
     return response.data;
   },
 
   async checkPhoneNumber(phoneNumber: string): Promise<ResponseBase<boolean>> {
-    const response = await api.get<ResponseBase<boolean>>('/auth/check-phone', {
-      params: { phoneNumber }
-    });
+    const response = await axiosInstance.get<ResponseBase<boolean>>(`/auth/check-phone?phoneNumber=${phoneNumber}`);
     return response.data;
   }
 };
