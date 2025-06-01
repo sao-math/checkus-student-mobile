@@ -13,6 +13,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import authService from "@/services/auth";
 
 const Account = () => {
   const navigate = useNavigate();
@@ -21,7 +22,8 @@ const Account = () => {
 
   const handleLogout = async () => {
     try {
-      await logout();
+      await authService.logout();
+      logout();
       toast({
         title: "로그아웃 되었습니다",
         description: "다음에 또 만나요!",
