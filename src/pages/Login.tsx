@@ -8,6 +8,7 @@ import { Eye, EyeOff, User, Lock, AlertCircle } from "lucide-react";
 import { useAuth } from '../contexts/AuthContext';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AxiosError } from 'axios';
+import authService from '../services/auth';
 
 export const Login: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -31,6 +32,24 @@ export const Login: React.FC = () => {
 
     try {
       await login({ username, password });
+      // Get the latest user info after login
+      const userResponse = await authService.getCurrentUser();
+      if (userResponse.success && userResponse.data) {
+        const userRoles = userResponse.data.roles.map(role => role.toUpperCase());
+        
+        // Check if user has either STUDENT or GUARDIAN role
+        if (userRoles.includes('STUDENT')) {
+          navigate('/dashboard');
+        } else if (userRoles.includes('GUARDIAN')) {
+          navigate('/student-selection');
+        } else {
+          // For users without STUDENT or GUARDIAN roles
+          setError('접근 권한이 없습니다. 관리자에게 문의해주세요.');
+          // Logout the user since they don't have access
+          await authService.logout();
+          localStorage.removeItem('accessToken');
+        }
+      }
     } catch (err) {
       if (err instanceof AxiosError && err.response?.data?.message) {
         setError(err.response.data.message);
@@ -113,10 +132,6 @@ export const Login: React.FC = () => {
                   </button>
                 </div>
               </div>
-              
-              <p className="text-xs text-gray-500 mt-1">
-                * 테스트: 학부모 로그인은 "parent"로 시작하는 아이디를 입력하세요
-              </p>
             </CardContent>
 
             <CardFooter className="flex-col gap-3">

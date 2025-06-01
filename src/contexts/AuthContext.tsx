@@ -62,7 +62,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (userResponse.success && userResponse.data) {
           setIsAuthenticated(true);
           setUser(userResponse.data);
-          window.location.href = '/dashboard';
         } else {
           throw new Error('Failed to verify user session');
         }
