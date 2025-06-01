@@ -3,7 +3,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { Toaster } from './components/ui/toaster';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import Login from './pages/Login';
-import Register from './pages/Register';
+import { Register } from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Account from './pages/Account';
 import NotFound from './pages/NotFound';
