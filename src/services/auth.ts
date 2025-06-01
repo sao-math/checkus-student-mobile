@@ -10,7 +10,8 @@ import {
   UserInfoResponse,
   ResponseBase,
   UserInfo,
-  GuardianRegisterRequest
+  GuardianRegisterRequest,
+  UpdateProfileRequest
 } from '../types/auth';
 
 const authService = {
@@ -40,7 +41,7 @@ const authService = {
   },
 
   async getCurrentUser(): Promise<ResponseBase<UserInfo>> {
-    const response = await axiosInstance.get<ResponseBase<UserInfo>>('/auth/me');
+    const response = await axiosInstance.get<ResponseBase<UserInfo>>('/user/me');
     return response.data;
   },
 
@@ -51,6 +52,11 @@ const authService = {
 
   async checkPhoneNumber(phoneNumber: string): Promise<ResponseBase<boolean>> {
     const response = await axiosInstance.get<ResponseBase<boolean>>(`/auth/check-phone?phoneNumber=${phoneNumber}`);
+    return response.data;
+  },
+
+  async updateProfile(request: UpdateProfileRequest): Promise<ResponseBase<UserInfo>> {
+    const response = await axiosInstance.put<ResponseBase<UserInfo>>('/user/profile', request);
     return response.data;
   }
 };

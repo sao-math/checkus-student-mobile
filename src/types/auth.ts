@@ -13,6 +13,16 @@ export interface LoginResponse {
   tokenType: string;
 }
 
+export interface StudentProfile {
+  status: string;
+  school: {
+    id: number;
+    name: string;
+  };
+  grade: number;
+  gender: string;
+}
+
 export interface UserInfo {
   id: number;
   username: string;
@@ -21,6 +31,7 @@ export interface UserInfo {
   discordId: string | null;
   roles: string[];
   createdAt: string | null;
+  studentProfile?: StudentProfile;
 }
 
 export interface StudentRegisterRequest {
@@ -31,7 +42,7 @@ export interface StudentRegisterRequest {
   discordId?: string;
   schoolName: string;
   grade: number;
-  gender: 'MALE' | 'FEMALE' | 'OTHER';
+  gender: string;
 }
 
 export interface GuardianRegisterRequest {
@@ -69,10 +80,21 @@ export interface UserInfoResponse {
   discordId: string | null;
   roles: string[];
   createdAt: string | null;
+  studentProfile?: StudentProfile;
 }
 
 export interface ResponseBase<T> {
   success: boolean;
   message: string | null;
   data: T | null;
+}
+
+export interface UpdateProfileRequest {
+  name: string;
+  phoneNumber: string;
+  discordId?: string;
+  gender?: string;
+  school?: string;
+  grade?: string;
+  status?: string;
 } 
