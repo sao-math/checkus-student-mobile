@@ -85,6 +85,52 @@ export const Register: React.FC = () => {
     setSchoolOpen(false);
   };
 
+  const formatPhoneNumber = (value: string) => {
+    // Remove all non-digit characters
+    const numbers = value.replace(/\D/g, '');
+    
+    // If empty, return just '010'
+    if (numbers.length === 0) return '010';
+    
+    // Format the number with hyphens
+    let formatted = '010';
+    const remainingNumbers = numbers.slice(3); // Skip the first 3 digits (010)
+    
+    if (remainingNumbers.length > 0) {
+      formatted += '-' + remainingNumbers.slice(0, 4);
+      if (remainingNumbers.length > 4) {
+        formatted += '-' + remainingNumbers.slice(4, 8);
+      }
+    }
+    return formatted;
+  };
+
+  const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target.value;
+    
+    // If user is deleting and we're about to delete the '010' prefix, prevent it
+    if (input.length < formData.phoneNumber.length && input.length <= 3) {
+      return;
+    }
+
+    // Format the number
+    const formattedNumber = formatPhoneNumber(input);
+    setFormData(prev => ({
+      ...prev,
+      phoneNumber: formattedNumber
+    }));
+  };
+
+  // Initialize phone number with '010' when component mounts
+  useEffect(() => {
+    if (!formData.phoneNumber) {
+      setFormData(prev => ({
+        ...prev,
+        phoneNumber: '010'
+      }));
+    }
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -316,7 +362,8 @@ export const Register: React.FC = () => {
                   required
                   placeholder="010-0000-0000"
                   value={formData.phoneNumber}
-                  onChange={handleChange}
+                  onChange={handlePhoneNumberChange}
+                  maxLength={13} // 010-0000-0000 format
                 />
               </div>
 
