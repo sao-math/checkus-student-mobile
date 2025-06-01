@@ -40,6 +40,22 @@ export const Register: React.FC = () => {
     gender: 'MALE'
   });
 
+  const gradeOptions = [
+    // { value: '1', label: '초1' },
+    // { value: '2', label: '초2' },
+    // { value: '3', label: '초3' },
+    // { value: '4', label: '초4' },
+    // { value: '5', label: '초5' },
+    // { value: '6', label: '초6' },
+    { value: '7', label: '중학교 1학년' },
+    { value: '8', label: '중학교 2학년' },
+    { value: '9', label: '중학교 3학년' },
+    { value: '10', label: '고등학교 1학년' },
+    { value: '11', label: '고등학교 2학년' },
+    { value: '12', label: '고등학교 3학년' },
+    { value: '13', label: 'N수생' }
+  ];
+
   useEffect(() => {
     const password = formData.password;
     setPasswordStrength({
@@ -430,9 +446,9 @@ export const Register: React.FC = () => {
                         <SelectValue placeholder="학년 선택" />
                       </SelectTrigger>
                       <SelectContent>
-                        {[1, 2, 3].map((grade) => (
-                          <SelectItem key={grade} value={grade.toString()}>
-                            {grade}학년
+                        {gradeOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
                           </SelectItem>
                         ))}
                       </SelectContent>
