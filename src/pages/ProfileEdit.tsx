@@ -13,6 +13,7 @@ const ProfileEdit = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [userData, setUserData] = useState<ProfileFormData | null>(null);
+  const [isReadOnly, setIsReadOnly] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -20,6 +21,10 @@ const ProfileEdit = () => {
         const response = await authService.getCurrentUser();
         if (response.success && response.data) {
           const userRole = response.data.roles[0]?.toLowerCase() || 'student';
+          
+          // 학생이나 학부모인 경우 읽기 전용으로 설정
+          setIsReadOnly(userRole === 'student' || userRole === 'guardian');
+
           setUserData({
             name: response.data.name,
             username: response.data.username,
@@ -103,7 +108,7 @@ const ProfileEdit = () => {
       <Header />
       <div className="container max-w-md mx-auto p-4">
         <h1 className="text-2xl font-bold mb-6">프로필 정보</h1>
-        <ProfileForm initialData={userData} onSubmit={handleSubmit} />
+        <ProfileForm initialData={userData} onSubmit={handleSubmit} readOnly={isReadOnly} />
       </div>
     </div>
   );

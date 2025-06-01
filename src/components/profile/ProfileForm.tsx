@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -10,6 +9,7 @@ import GuardianFields from "./GuardianFields";
 interface ProfileFormProps {
   onSubmit?: (formData: ProfileFormData) => Promise<void>;
   initialData?: ProfileFormData;
+  readOnly?: boolean;
 }
 
 export interface ProfileFormData {
@@ -44,7 +44,8 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
     school: "OO중학교",
     grade: "2",
     status: "ENROLLED",
-  }
+  },
+  readOnly = false
 }) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -52,8 +53,8 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
   const [formData, setFormData] = useState<ProfileFormData>(initialData);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-  // 학생인지 확인
-  const isStudent = formData.role === "student";
+  // 학생이나 학부모인 경우 읽기 전용으로 설정
+  const isReadOnly = readOnly || formData.role === "student" || formData.role === "guardian";
 
   // Example school list - in a real app, this would come from an API
   const schools = [
@@ -68,24 +69,24 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
   ];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (isStudent) return; // 학생은 수정 불가
+    if (isReadOnly) return;
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSelectChange = (name: string, value: string) => {
-    if (isStudent) return; // 학생은 수정 불가
+    if (isReadOnly) return;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSchoolSelect = (school: string) => {
-    if (isStudent) return; // 학생은 수정 불가
+    if (isReadOnly) return;
     setFormData((prev) => ({ ...prev, school }));
     setSchoolOpen(false);
   };
 
   const handleRelationshipChange = (index: number, field: string, value: string) => {
-    if (isStudent) return; // 학생은 수정 불가
+    if (isReadOnly) return;
     if (formData.studentRelationships) {
       const updatedRelationships = [...formData.studentRelationships];
       updatedRelationships[index] = {
@@ -102,16 +103,14 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (isStudent) return; // 학생은 제출 불가
+    if (isReadOnly) return;
     
     setLoading(true);
     
     try {
-      // If there's an external submit handler, use it
       if (onSubmit) {
         await onSubmit(formData);
       } else {
-        // Default implementation if no external handler provided
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
       
@@ -134,7 +133,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
     <Card>
       <CardHeader>
         <CardTitle>
-          {isStudent ? "내 정보 확인" : "내 정보 수정"}
+          {isReadOnly ? "내 정보 확인" : "내 정보 수정"}
         </CardTitle>
       </CardHeader>
       <form onSubmit={handleSubmit}>
@@ -143,7 +142,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
             formData={formData}
             handleChange={handleChange}
             fieldErrors={fieldErrors}
-            readOnly={isStudent}
+            readOnly={isReadOnly}
           />
 
           {formData.role === "student" && (
@@ -154,11 +153,11 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
               schoolOpen={schoolOpen}
               setSchoolOpen={setSchoolOpen}
               handleSchoolSelect={handleSchoolSelect}
-              readOnly={isStudent}
+              readOnly={isReadOnly}
             />
           )}
 
-          {formData.role === "parent" && (
+          {formData.role === "guardian" && (
             <GuardianFields 
               studentRelationships={formData.studentRelationships || []}
               onRelationshipChange={handleRelationshipChange}
@@ -167,14 +166,14 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
         </CardContent>
 
         <CardFooter className="flex-col gap-3">
-          {!isStudent && (
+          {!isReadOnly && (
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "저장 중..." : "저장하기"}
             </Button>
           )}
-          {isStudent && (
+          {isReadOnly && (
             <div className="text-sm text-gray-500 text-center">
-              학생은 프로필 정보를 수정할 수 없습니다
+              {formData.role === "student" ? "학생" : "학부모"}은 프로필 정보를 수정할 수 없습니다
             </div>
           )}
         </CardFooter>
