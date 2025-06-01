@@ -9,7 +9,8 @@ import {
   LogoutRequest,
   UserInfoResponse,
   ResponseBase,
-  UserInfo
+  UserInfo,
+  GuardianRegisterRequest
 } from '../types/auth';
 
 const authService = {
@@ -20,6 +21,11 @@ const authService = {
 
   async registerStudent(request: StudentRegisterRequest): Promise<ResponseBase<RegisterResponse>> {
     const response = await axiosInstance.post<ResponseBase<null>>('/auth/register/student', request);
+    return response.data;
+  },
+
+  async registerGuardian(request: GuardianRegisterRequest): Promise<ResponseBase<RegisterResponse>> {
+    const response = await axiosInstance.post<ResponseBase<null>>('/auth/register/guardian', request);
     return response.data;
   },
 

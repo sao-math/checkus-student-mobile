@@ -34,6 +34,14 @@ export interface StudentRegisterRequest {
   gender: 'MALE' | 'FEMALE' | 'OTHER';
 }
 
+export interface GuardianRegisterRequest {
+  username: string;
+  password: string;
+  name: string;
+  phoneNumber: string;
+  discordId?: string;
+}
+
 export interface RegisterResponse {
   userId: number;
   username: string;

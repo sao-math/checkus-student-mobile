@@ -103,8 +103,22 @@ export const Register: React.FC = () => {
         throw new Error('이미 등록된 전화번호입니다.');
       }
 
-      // Register the student
-      const response = await authService.registerStudent(formData);
+      // Register based on role
+      let response;
+      if (role === 'student') {
+        response = await authService.registerStudent(formData);
+      } else {
+        // For guardian, we only need basic info
+        const guardianData = {
+          username: formData.username,
+          password: formData.password,
+          name: formData.name,
+          phoneNumber: formData.phoneNumber,
+          discordId: formData.discordId
+        };
+        response = await authService.registerGuardian(guardianData);
+      }
+
       if (response.success) {
         navigate('/login', { 
           state: { 
@@ -318,80 +332,84 @@ export const Register: React.FC = () => {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="schoolName">학교</Label>
-                <Popover open={schoolOpen} onOpenChange={setSchoolOpen}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      aria-expanded={schoolOpen}
-                      className="w-full justify-between"
+              {role === 'student' && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="schoolName">학교</Label>
+                    <Popover open={schoolOpen} onOpenChange={setSchoolOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={schoolOpen}
+                          className="w-full justify-between"
+                        >
+                          {formData.schoolName || "학교 검색"}
+                          <School className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-full p-0">
+                        <Command>
+                          <CommandInput placeholder="학교 검색..." />
+                          <CommandEmpty>검색 결과가 없습니다</CommandEmpty>
+                          <CommandGroup>
+                            <CommandList>
+                              <CommandItem 
+                                value="서울고등학교"
+                                onSelect={() => handleSchoolSelect("서울고등학교")}
+                              >
+                                서울고등학교
+                              </CommandItem>
+                              <CommandItem 
+                                value="서울중학교"
+                                onSelect={() => handleSchoolSelect("서울중학교")}
+                              >
+                                서울중학교
+                              </CommandItem>
+                            </CommandList>
+                          </CommandGroup>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="grade">학년</Label>
+                    <Select
+                      value={formData.grade.toString()}
+                      onValueChange={(value) => handleSelectChange('grade', value)}
                     >
-                      {formData.schoolName || "학교 검색"}
-                      <School className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-full p-0">
-                    <Command>
-                      <CommandInput placeholder="학교 검색..." />
-                      <CommandEmpty>검색 결과가 없습니다</CommandEmpty>
-                      <CommandGroup>
-                        <CommandList>
-                          <CommandItem 
-                            value="서울고등학교"
-                            onSelect={() => handleSchoolSelect("서울고등학교")}
-                          >
-                            서울고등학교
-                          </CommandItem>
-                          <CommandItem 
-                            value="서울중학교"
-                            onSelect={() => handleSchoolSelect("서울중학교")}
-                          >
-                            서울중학교
-                          </CommandItem>
-                        </CommandList>
-                      </CommandGroup>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-              </div>
+                      <SelectTrigger id="grade">
+                        <SelectValue placeholder="학년 선택" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[1, 2, 3].map((grade) => (
+                          <SelectItem key={grade} value={grade.toString()}>
+                            {grade}학년
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="grade">학년</Label>
-                <Select
-                  value={formData.grade.toString()}
-                  onValueChange={(value) => handleSelectChange('grade', value)}
-                >
-                  <SelectTrigger id="grade">
-                    <SelectValue placeholder="학년 선택" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[1, 2, 3].map((grade) => (
-                      <SelectItem key={grade} value={grade.toString()}>
-                        {grade}학년
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="gender">성별</Label>
-                <Select
-                  value={formData.gender}
-                  onValueChange={(value) => handleSelectChange('gender', value)}
-                >
-                  <SelectTrigger id="gender">
-                    <SelectValue placeholder="성별 선택" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="MALE">남성</SelectItem>
-                    <SelectItem value="FEMALE">여성</SelectItem>
-                    <SelectItem value="OTHER">기타</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="gender">성별</Label>
+                    <Select
+                      value={formData.gender}
+                      onValueChange={(value) => handleSelectChange('gender', value)}
+                    >
+                      <SelectTrigger id="gender">
+                        <SelectValue placeholder="성별 선택" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="MALE">남성</SelectItem>
+                        <SelectItem value="FEMALE">여성</SelectItem>
+                        <SelectItem value="OTHER">기타</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
             </CardContent>
 
             <CardFooter className="flex-col gap-3">
