@@ -1,4 +1,3 @@
-
 import { User } from '@/types/api';
 
 export class UserService {
@@ -16,14 +15,14 @@ export class UserService {
     });
   }
 
-  async getUserProfile() {
-    return this.request<User>('/user/profile');
+  async getProfile(): Promise<User> {
+    return this.request<User>('/users/profile');
   }
 
-  async updateUserProfile(data: Partial<User>) {
-    return this.request<User>('/user/profile', {
+  async updateProfile(request: UpdateUserRequest): Promise<User> {
+    return this.request<User>('/users/profile', {
       method: 'PUT',
-      body: JSON.stringify(data),
+      body: JSON.stringify(request),
     });
   }
 }

@@ -41,7 +41,7 @@ const authService = {
   },
 
   async getCurrentUser(): Promise<ResponseBase<UserInfo>> {
-    const response = await axiosInstance.get<ResponseBase<UserInfo>>('/user/me');
+    const response = await axiosInstance.get<ResponseBase<UserInfo>>('/users/me');
     return response.data;
   },
 
@@ -56,7 +56,7 @@ const authService = {
   },
 
   async updateProfile(request: UpdateProfileRequest): Promise<ResponseBase<UserInfo>> {
-    const response = await axiosInstance.put<ResponseBase<UserInfo>>('/user/profile', request);
+    const response = await axiosInstance.put<ResponseBase<UserInfo>>('/users/profile', request);
     return response.data;
   }
 };

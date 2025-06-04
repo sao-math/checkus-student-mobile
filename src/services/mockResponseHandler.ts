@@ -1,4 +1,3 @@
-
 import { mockUser, mockUsers, mockConnectedStudents, mockStudentsWithProfile } from './mock/mockUsers';
 import { mockTasks } from './mock/mockTasks';
 import { mockNotificationTypes, mockNotificationSettings } from './mock/mockNotifications';
@@ -17,7 +16,7 @@ export class MockResponseHandler {
     if (endpoint.startsWith('/auth/check-phone/')) return { available: true };
 
     // 사용자 관리
-    if (endpoint === '/user/profile') return mockUser;
+    if (endpoint === '/users/profile') return mockUser;
 
     // 학교 관련
     if (endpoint === '/schools') return mockSchools;
