@@ -69,12 +69,6 @@ const Dashboard = () => {
     endDate.setDate(endDate.getDate() + userPreferredRange);
     */
     
-    console.log('🗓️ 선택된 날짜:', selectedDate.toLocaleDateString('ko-KR'));
-    console.log('📅 조회 범위:', {
-      startDate: formatLocalDateTime(startDate),
-      endDate: formatLocalDateTime(endDate)
-    });
-    
     return {
       startDate: formatLocalDateTime(startDate),
       endDate: formatLocalDateTime(endDate)
@@ -93,7 +87,6 @@ const Dashboard = () => {
   const taskUncompleteMutation = useTaskUncomplete();
 
   const handleDateSelect = (date: Date) => {
-    console.log('📌 달력에서 선택된 날짜:', date.toLocaleDateString('ko-KR'));
     setSelectedDate(date);
   };
 
@@ -111,12 +104,6 @@ const Dashboard = () => {
   // 선택된 날짜에 해당하는 할일만 필터링
   const filteredTasks = useMemo(() => {
     const selectedDateStr = formatLocalDate(selectedDate);
-    
-    console.log('🎯 할일 필터링:', {
-      selectedDateStr,
-      totalTasks: tasks.length,
-      taskDates: tasks.map(t => t.dueDate)
-    });
     
     return tasks.filter(task => {
       return task.dueDate === selectedDateStr;
