@@ -1,14 +1,13 @@
-
 import { Activity, AssignedStudyTime, ActualStudyTime, StudyTimeWithActuals, TimelineSegment } from '@/types/api';
 
 export const mockActivities: Activity[] = [
   {
-    id: "activity1",
+    id: 1,
     name: "수학 문제 풀이",
     isStudyAssignable: true
   },
   {
-    id: "activity2",
+    id: 2,
     name: "영어 단어 암기",
     isStudyAssignable: true
   }
@@ -16,46 +15,52 @@ export const mockActivities: Activity[] = [
 
 export const mockAssignedStudyTimes: AssignedStudyTime[] = [
   {
-    id: "1",
-    studentId: "user123",
-    activityId: "activity1",
+    id: 1,
+    studentId: 123,
+    title: "수학 공부",
+    activityId: 1,
+    activityName: "수학 문제 풀이",
     startTime: "2025-05-25T09:00:00Z",
     endTime: "2025-05-25T10:30:00Z",
-    assignedBy: "teacher1",
+    assignedBy: 1,
+    assignedByName: "김선생",
     activity: mockActivities[0]
   },
   {
-    id: "2", 
-    studentId: "user123",
-    activityId: "activity2",
+    id: 2, 
+    studentId: 123,
+    title: "영어 학습",
+    activityId: 2,
+    activityName: "영어 단어 암기",
     startTime: "2025-05-25T11:00:00Z",
     endTime: "2025-05-25T12:30:00Z",
-    assignedBy: "teacher2",
+    assignedBy: 2,
+    assignedByName: "이선생",
     activity: mockActivities[1]
   }
 ];
 
 export const mockActualStudyTimes: ActualStudyTime[] = [
   {
-    id: "actual1",
-    studentId: "user123", 
-    assignedStudyTimeId: "1",
+    id: 1,
+    studentId: 123, 
+    assignedStudyTimeId: 1,
     startTime: "2025-05-25T09:05:00Z",
     endTime: "2025-05-25T09:20:00Z",
     source: "discord"
   },
   {
-    id: "actual2",
-    studentId: "user123",
-    assignedStudyTimeId: "1", 
+    id: 2,
+    studentId: 123,
+    assignedStudyTimeId: 1, 
     startTime: "2025-05-25T09:25:00Z",
     endTime: "2025-05-25T09:45:00Z",
     source: "discord"
   },
   {
-    id: "actual3",
-    studentId: "user123",
-    assignedStudyTimeId: "2",
+    id: 3,
+    studentId: 123,
+    assignedStudyTimeId: 2,
     startTime: "2025-05-25T11:10:00Z", 
     endTime: "2025-05-25T12:15:00Z",
     source: "zoom"

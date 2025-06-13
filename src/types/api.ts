@@ -1,3 +1,9 @@
+// 서버 응답 기본 구조
+export interface ResponseBase<T> {
+  success: boolean;
+  message: string;
+  data: T | null;
+}
 
 // API 요청/응답 타입 정의
 export interface User {
@@ -42,7 +48,7 @@ export interface StudentGuardian {
 
 // 실제 데이터베이스 스키마에 맞는 Activity 타입
 export interface Activity {
-  id: string;
+  id: number;
   name: string;
   isStudyAssignable: boolean;
 }
@@ -63,19 +69,25 @@ export interface Task {
 
 // 서버 DB 구조에 맞는 새로운 스터디 타임 타입들
 export interface AssignedStudyTime {
-  id: string;
-  studentId: string;
-  activityId: string;
+  id: number;
+  studentId: number;
+  studentName?: string;
+  title?: string;
+  activityId: number;
+  activityName?: string;
+  isStudyAssignable?: boolean;
   startTime: string; // ISO timestamp
   endTime: string;   // ISO timestamp
-  assignedBy: string;
+  assignedBy: number;
+  assignedByName?: string;
   activity?: Activity;
 }
 
 export interface ActualStudyTime {
-  id: string;
-  studentId: string;
-  assignedStudyTimeId: string;
+  id: number;
+  studentId: number;
+  studentName?: string;
+  assignedStudyTimeId: number;
   startTime: string; // ISO timestamp
   endTime: string;   // ISO timestamp
   source: string;    // "discord" | "zoom" | "manual" 등

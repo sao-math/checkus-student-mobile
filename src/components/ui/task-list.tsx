@@ -65,7 +65,12 @@ const TaskList: React.FC<TaskListProps> = ({
               >
                 <div className="flex justify-between mb-2">
                   <div>
-                    <div className="font-medium">{studyTime.assigned.activity?.name || "공부 시간"}</div>
+                    <div className="font-medium">
+                      {studyTime.assigned.title || 
+                       studyTime.assigned.activityName || 
+                       studyTime.assigned.activity?.name || 
+                       "공부 시간"}
+                    </div>
                   </div>
                   <div className="text-sm text-gray-600 text-right">
                     <div>{formatTime(studyTime.assigned.startTime)} - {formatTime(studyTime.assigned.endTime)}</div>

@@ -1,4 +1,3 @@
-
 import { RegisterData, LoginData, User, Task, StudyTimeWithActuals, GuardianRequest, School, NotificationSettings, NotificationSetting, NotificationType, ConnectedStudent } from '@/types/api';
 import { MockResponseHandler } from './mockResponseHandler';
 import { AuthService } from './authService';
@@ -27,7 +26,7 @@ class ApiClient {
     this.userService = new UserService(this.mockResponseHandler);
     this.schoolService = new SchoolService(this.mockResponseHandler);
     this.taskService = new TaskService(this.mockResponseHandler);
-    this.studyTimeService = new StudyTimeService(this.mockResponseHandler);
+    this.studyTimeService = new StudyTimeService();
     this.guardianService = new GuardianService(this.mockResponseHandler);
     this.notificationService = new NotificationService(this.mockResponseHandler);
     this.fileService = new FileService(this.mockResponseHandler);
@@ -86,8 +85,24 @@ class ApiClient {
   }
 
   // Study time methods
-  async getStudyTimes() {
-    return this.studyTimeService.getStudyTimes();
+  async getStudyTimes(studentId: number, startDate?: string, endDate?: string) {
+    return this.studyTimeService.getStudyTimes(studentId, startDate, endDate);
+  }
+
+  async getAssignedStudyTimes(studentId: number, startDate: string, endDate: string) {
+    return this.studyTimeService.getAssignedStudyTimes(studentId, startDate, endDate);
+  }
+
+  async getActualStudyTimes(studentId: number, startDate: string, endDate: string) {
+    return this.studyTimeService.getActualStudyTimes(studentId, startDate, endDate);
+  }
+
+  async getStudyAssignableActivities() {
+    return this.studyTimeService.getStudyAssignableActivities();
+  }
+
+  async getUpcomingStudyTimes() {
+    return this.studyTimeService.getUpcomingStudyTimes();
   }
 
   async getCalendar() {

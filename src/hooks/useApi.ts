@@ -12,10 +12,16 @@ export const useTasks = () => {
 };
 
 // 수정된 스터디 타임 훅 - 새로운 타입 사용
-export const useStudyTimes = () => {
+export const useStudyTimes = (studentId?: number, startDate?: string, endDate?: string) => {
   return useQuery({
-    queryKey: ['study-times'],
-    queryFn: () => apiClient.getStudyTimes(),
+    queryKey: ['study-times', studentId, startDate, endDate],
+    queryFn: () => {
+      if (!studentId) {
+        throw new Error('Student ID is required');
+      }
+      return apiClient.getStudyTimes(studentId, startDate, endDate);
+    },
+    enabled: !!studentId, // Only run query if studentId is provided
   });
 };
 
