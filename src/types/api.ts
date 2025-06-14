@@ -89,7 +89,7 @@ export interface ActualStudyTime {
   studentName?: string;
   assignedStudyTimeId: number;
   startTime: string; // ISO timestamp
-  endTime: string;   // ISO timestamp
+  endTime: string | null;   // ISO timestamp, null for ongoing sessions
   source: string;    // "discord" | "zoom" | "manual" 등
 }
 

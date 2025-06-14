@@ -24,7 +24,6 @@ export class MockResponseHandler {
 
     // 대시보드/학습 관리
     if (endpoint === '/dashboard/tasks') return mockTasks;
-    if (endpoint === '/dashboard/study-times') return generateStudyTimesWithActuals();
     if (endpoint === '/dashboard/calendar') return { events: [] };
 
     // 할일 관리

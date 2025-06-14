@@ -64,6 +64,14 @@ export const mockActualStudyTimes: ActualStudyTime[] = [
     startTime: "2025-05-25T11:10:00Z", 
     endTime: "2025-05-25T12:15:00Z",
     source: "zoom"
+  },
+  {
+    id: 4,
+    studentId: 123,
+    assignedStudyTimeId: 1,
+    startTime: "2025-05-25T14:30:00Z",
+    endTime: null,
+    source: "discord"
   }
 ];
 
@@ -75,6 +83,8 @@ const calculateTimeline = (assigned: AssignedStudyTime, actuals: ActualStudyTime
   const timeline: TimelineSegment[] = [];
   
   actuals.forEach(actual => {
+    if (!actual.endTime) return;
+    
     const actualStart = new Date(actual.startTime).getTime();
     const actualEnd = new Date(actual.endTime).getTime();
     
@@ -127,6 +137,8 @@ export const generateStudyTimesWithActuals = (): StudyTimeWithActuals[] => {
     const actuals = mockActualStudyTimes.filter(actual => actual.assignedStudyTimeId === assigned.id);
     
     const totalConnectedMinutes = actuals.reduce((total, actual) => {
+      if (!actual.endTime) return total;
+      
       const duration = new Date(actual.endTime).getTime() - new Date(actual.startTime).getTime();
       return total + Math.round(duration / (1000 * 60));
     }, 0);

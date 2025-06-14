@@ -19,16 +19,24 @@ export class StudyTimeService {
 
   // 학생의 실제 공부 시간 조회
   async getActualStudyTimes(studentId: number, startDate: string, endDate: string): Promise<ResponseBase<ActualStudyTime[]>> {
-    const response = await axiosInstance.get<ResponseBase<ActualStudyTime[]>>(
-      `/study-time/actual/student/${studentId}`,
-      {
-        params: {
-          startDate,
-          endDate
+    try {
+      const response = await axiosInstance.get<ResponseBase<ActualStudyTime[]>>(
+        `/study-time/actual/student/${studentId}`,
+        {
+          params: {
+            startDate,
+            endDate
+          }
         }
-      }
-    );
-    return response.data;
+      );
+      
+      console.log('실제 공부 시간 API 응답:', response.data);
+      
+      return response.data;
+    } catch (error) {
+      console.error('실제 공부 시간 조회 실패:', error);
+      throw error;
+    }
   }
 
   // 공부 배정 가능한 활동 목록 조회
@@ -52,6 +60,9 @@ export class StudyTimeService {
     const timeline: TimelineSegment[] = [];
     
     actuals.forEach(actual => {
+      // Skip if endTime is null (ongoing session)
+      if (!actual.endTime) return;
+      
       const actualStart = new Date(actual.startTime).getTime();
       const actualEnd = new Date(actual.endTime).getTime();
       
@@ -106,30 +117,56 @@ export class StudyTimeService {
     const defaultStartDate = startDate || new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
     const defaultEndDate = endDate || new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
+    console.log('공부 시간 조회 시작:', { studentId, startDate: defaultStartDate, endDate: defaultEndDate });
+
     const [assignedResponse, actualResponse] = await Promise.all([
       this.getAssignedStudyTimes(studentId, defaultStartDate, defaultEndDate),
       this.getActualStudyTimes(studentId, defaultStartDate, defaultEndDate)
     ]);
 
     if (!assignedResponse.success || !actualResponse.success) {
+      console.error('API 응답 실패:', { assignedResponse, actualResponse });
       throw new Error('Failed to fetch study times');
     }
 
     const assignedStudyTimes = assignedResponse.data || [];
     const actualStudyTimes = actualResponse.data || [];
 
+    console.log('API 데이터 수신:', { 
+      assignedCount: assignedStudyTimes.length, 
+      actualCount: actualStudyTimes.length,
+      assignedStudyTimes,
+      actualStudyTimes
+    });
+
     return assignedStudyTimes.map(assigned => {
       const actuals = actualStudyTimes.filter(actual => actual.assignedStudyTimeId === assigned.id);
       
       const totalConnectedMinutes = actuals.reduce((total, actual) => {
+        // Skip if endTime is null (ongoing session)
+        if (!actual.endTime) {
+          console.log('진행 중인 세션 건너뜀:', actual);
+          return total;
+        }
+        
         const duration = new Date(actual.endTime).getTime() - new Date(actual.startTime).getTime();
-        return total + Math.round(duration / (1000 * 60));
+        const minutes = Math.round(duration / (1000 * 60));
+        console.log('실제 접속 시간 계산:', { actual, duration, minutes });
+        return total + minutes;
       }, 0);
       
       const assignedDuration = new Date(assigned.endTime).getTime() - new Date(assigned.startTime).getTime();
       const assignedMinutes = Math.round(assignedDuration / (1000 * 60));
       
       const progressPercent = assignedMinutes > 0 ? Math.round((totalConnectedMinutes / assignedMinutes) * 100) : 0;
+      
+      console.log('진행률 계산:', {
+        assignedId: assigned.id,
+        totalConnectedMinutes,
+        assignedMinutes,
+        progressPercent,
+        actualsCount: actuals.length
+      });
       
       const now = new Date().getTime();
       const isActive = now >= new Date(assigned.startTime).getTime() && now <= new Date(assigned.endTime).getTime();

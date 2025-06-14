@@ -77,6 +77,12 @@ const Dashboard = () => {
 
   // API 훅 사용 - 선택된 날짜 기준으로 공부시간 조회
   const { data: tasks = [], isLoading: tasksLoading } = useTasks();
+  
+  // Debug: 사용자 ID 로깅
+  console.log('Dashboard - User:', user);
+  console.log('Dashboard - User ID for API call:', user?.id);
+  console.log('Dashboard - Date range:', dateRange);
+  
   const { data: studyTimes = [], isLoading: studyTimesLoading } = useStudyTimes(
     user?.id, 
     dateRange.startDate, 
