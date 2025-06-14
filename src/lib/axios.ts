@@ -31,8 +31,8 @@ axiosInstance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Don't retry login requests
-    if (originalRequest.url === '/auth/login') {
+    // Don't retry login or refresh requests
+    if (originalRequest.url === '/auth/login' || originalRequest.url === '/auth/refresh') {
       return Promise.reject(error);
     }
 
@@ -46,7 +46,9 @@ axiosInstance.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return axiosInstance(originalRequest);
       } catch (refreshError) {
-        window.location.href = '/checkus-student-mobile/login';
+        // Clear the token and redirect to login
+        localStorage.removeItem('accessToken');
+        window.location.href = '/login';
         return Promise.reject(refreshError);
       }
     }

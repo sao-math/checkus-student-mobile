@@ -39,7 +39,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(null);
         }
       } catch (error) {
-        // Token is invalid, clear it
+        // Token is invalid or there's a network error, clear it
+        console.error('Auth check failed:', error);
         localStorage.removeItem('accessToken');
         setIsAuthenticated(false);
         setUser(null);
@@ -57,12 +58,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (response.success && response.data) {
         const { accessToken } = response.data;
         localStorage.setItem('accessToken', accessToken);
+        
         // Verify the token by getting user info
-        const userResponse = await authService.getCurrentUser();
-        if (userResponse.success && userResponse.data) {
-          setIsAuthenticated(true);
-          setUser(userResponse.data);
-        } else {
+        try {
+          const userResponse = await authService.getCurrentUser();
+          if (userResponse.success && userResponse.data) {
+            setIsAuthenticated(true);
+            setUser(userResponse.data);
+          } else {
+            throw new Error('Failed to verify user session');
+          }
+        } catch (userError) {
+          // If user verification fails, clear the token and throw error
+          localStorage.removeItem('accessToken');
           throw new Error('Failed to verify user session');
         }
       } else {
