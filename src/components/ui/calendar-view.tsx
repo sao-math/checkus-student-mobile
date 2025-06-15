@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -26,13 +25,21 @@ const CalendarView: React.FC<CalendarViewProps> = ({
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
-  // Mock completion data - in a real app, this would come from props or an API
-  const getCompletionClass = (completionRate: number) => {
-    if (completionRate >= 100) return "completion-100";
-    if (completionRate >= 75) return "completion-75";
-    if (completionRate >= 50) return "completion-50";
-    if (completionRate >= 25) return "completion-25";
-    return "completion-0";
+  // 완수율에 따른 그라데이션 색상 생성 함수
+  const getCompletionColor = (completionRate: number) => {
+    // 0%: 빨강 (0도), 100%: 초록 (120도)
+    const hue = (completionRate / 100) * 120;
+    // 채도와 명도 조정 (너무 진하지 않게)
+    const saturation = 50; // 50%
+    const lightness = 85; // 85% (밝은 배경색)
+    
+    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+  };
+
+  // 텍스트 색상 결정 (배경색에 따라)
+  const getTextColor = (completionRate: number) => {
+    // 완수율이 높을수록(초록색에 가까울수록) 어두운 텍스트
+    return completionRate > 50 ? "#166534" : "#991b1b"; // green-800 : red-800
   };
 
   const generateMockCompletionRate = (date: Date) => {
@@ -188,20 +195,26 @@ const CalendarView: React.FC<CalendarViewProps> = ({
           {["일", "월", "화", "수", "목", "금", "토"].map((day) => (
             <div key={day} className="text-xs font-medium text-gray-500 py-1">{day}</div>
           ))}
-          {days.map((day, index) => (
-            <div 
-              key={index} 
-              className={cn(
-                "calendar-day", 
-                !day.isCurrentMonth && "text-gray-400",
-                getCompletionClass(day.completionRate),
-                selectedDate.toDateString() === day.date.toDateString() && "!bg-primary !text-white border-2 border-primary"
-              )}
-              onClick={() => handleDateClick(day)}
-            >
-              {day.date.getDate()}
-            </div>
-          ))}
+          {days.map((day, index) => {
+            const isSelected = selectedDate.toDateString() === day.date.toDateString();
+            return (
+              <div 
+                key={index} 
+                className={cn(
+                  "calendar-day", 
+                  !day.isCurrentMonth && "text-gray-400",
+                  isSelected && "!bg-primary !text-white border-2 border-primary"
+                )}
+                style={!isSelected ? {
+                  backgroundColor: getCompletionColor(day.completionRate),
+                  color: getTextColor(day.completionRate)
+                } : undefined}
+                onClick={() => handleDateClick(day)}
+              >
+                {day.date.getDate()}
+              </div>
+            );
+          })}
         </div>
       )}
 
@@ -218,9 +231,12 @@ const CalendarView: React.FC<CalendarViewProps> = ({
               <div 
                 className={cn(
                   "calendar-day", 
-                  getCompletionClass(day.completionRate),
                   selectedDate.toDateString() === day.date.toDateString() && "!bg-primary !text-white border-2 border-primary"
                 )}
+                style={selectedDate.toDateString() !== day.date.toDateString() ? {
+                  backgroundColor: getCompletionColor(day.completionRate),
+                  color: getTextColor(day.completionRate)
+                } : undefined}
                 onClick={() => handleDateClick(day)}
               >
                 {day.date.getDate()}
