@@ -78,11 +78,6 @@ const Dashboard = () => {
   // API 훅 사용 - 선택된 날짜 기준으로 공부시간 조회
   const { data: tasks = [], isLoading: tasksLoading } = useTasks();
   
-  // Debug: 사용자 ID 로깅
-  console.log('Dashboard - User:', user);
-  console.log('Dashboard - User ID for API call:', user?.id);
-  console.log('Dashboard - Date range:', dateRange);
-  
   const { data: studyTimes = [], isLoading: studyTimesLoading } = useStudyTimes(
     user?.id, 
     dateRange.startDate, 
@@ -142,12 +137,7 @@ const Dashboard = () => {
   // 새로운 스터디 타임 클릭 핸들러
   const handleStudyTimeClick = (studyTime: StudyTimeWithActuals) => {
     // 실제로는 Discord나 다른 스터디 플랫폼으로 연결
-    console.log('Study time clicked:', {
-      assigned: studyTime.assigned,
-      actuals: studyTime.actuals,
-      progress: `${studyTime.progressPercent}%`,
-      totalMinutes: studyTime.totalConnectedMinutes
-    });
+    // TODO: Discord 연결 로직 구현
   };
 
   if (tasksLoading || studyTimesLoading) {
@@ -173,6 +163,7 @@ const Dashboard = () => {
         
         <CalendarView 
           onSelectDate={handleDateSelect} 
+          selectedDate={selectedDate}
           view={calendarView}
           setView={setCalendarView}
           className="mb-6"

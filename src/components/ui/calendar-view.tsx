@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -10,6 +10,7 @@ interface CalendarDay {
 
 interface CalendarViewProps {
   onSelectDate: (date: Date) => void;
+  selectedDate: Date;
   className?: string;
   view: "month" | "week";
   setView: (view: "month" | "week") => void;
@@ -17,12 +18,12 @@ interface CalendarViewProps {
 
 const CalendarView: React.FC<CalendarViewProps> = ({
   onSelectDate,
+  selectedDate,
   className,
   view,
   setView,
 }) => {
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
   // 오늘 날짜를 한 번만 계산
   const today = new Date();
@@ -95,14 +96,12 @@ const CalendarView: React.FC<CalendarViewProps> = ({
   }, [view, currentDate]);
   
   const handleDateClick = useCallback((day: CalendarDay) => {
-    setSelectedDate(day.date);
+    onSelectDate(day.date);
     
     // 다른 달의 날짜를 클릭한 경우, currentDate도 해당 월로 업데이트
     if (!day.isCurrentMonth) {
       setCurrentDate(new Date(day.date.getFullYear(), day.date.getMonth(), 1));
     }
-    
-    onSelectDate(day.date);
   }, [onSelectDate]);
 
   const handlePrevious = useCallback(() => {
@@ -139,6 +138,15 @@ const CalendarView: React.FC<CalendarViewProps> = ({
     
     return `${weekStart.toLocaleDateString("ko-KR", { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString("ko-KR", { month: 'short', day: 'numeric' })}`;
   };
+
+  // selectedDate가 변경될 때 currentDate 동기화
+  useEffect(() => {
+    // 선택된 날짜의 월이 현재 표시하는 월과 다르면 달력을 해당 월로 이동
+    if (selectedDate.getMonth() !== currentDate.getMonth() || 
+        selectedDate.getFullYear() !== currentDate.getFullYear()) {
+      setCurrentDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1));
+    }
+  }, [selectedDate, currentDate]);
 
   return (
     <div className={cn("calendar-container", className)}>
