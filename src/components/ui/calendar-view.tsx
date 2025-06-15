@@ -7,6 +7,8 @@ interface CalendarDay {
   date: Date;
   isCurrentMonth: boolean;
   completionRate: number; // 0-100
+  hasTask: boolean; // 할일이 있는지 여부
+  isFuture: boolean; // 미래 날짜인지 여부
 }
 
 interface CalendarViewProps {
@@ -25,27 +27,54 @@ const CalendarView: React.FC<CalendarViewProps> = ({
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
-  // 완수율에 따른 그라데이션 색상 생성 함수
-  const getCompletionColor = (completionRate: number) => {
-    // 0%: 빨강 (0도), 100%: 초록 (120도)
-    const hue = (completionRate / 100) * 120;
-    // 채도와 명도 조정 (너무 진하지 않게)
-    const saturation = 50; // 50%
-    const lightness = 85; // 85% (밝은 배경색)
+  // 날짜별 색상과 텍스트 색상을 결정하는 함수
+  const getDayStyle = (day: CalendarDay) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dayDate = new Date(day.date);
+    dayDate.setHours(0, 0, 0, 0);
     
-    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    // 미래 날짜인 경우
+    if (dayDate > today) {
+      return {
+        backgroundColor: '#f3f4f6', // gray-100
+        color: '#9ca3af' // gray-400
+      };
+    }
+    
+    // 할일이 없는 경우
+    if (!day.hasTask) {
+      return {
+        backgroundColor: '#e5e7eb', // gray-200  
+        color: '#6b7280' // gray-500
+      };
+    }
+    
+    // 할일이 있는 경우 - 완수율에 따른 그라데이션
+    const hue = (day.completionRate / 100) * 120; // 0%: 빨강(0도), 100%: 초록(120도)
+    const saturation = 50;
+    const lightness = 85;
+    
+    return {
+      backgroundColor: `hsl(${hue}, ${saturation}%, ${lightness}%)`,
+      color: day.completionRate > 50 ? "#166534" : "#991b1b" // green-800 : red-800
+    };
   };
 
-  // 텍스트 색상 결정 (배경색에 따라)
-  const getTextColor = (completionRate: number) => {
-    // 완수율이 높을수록(초록색에 가까울수록) 어두운 텍스트
-    return completionRate > 50 ? "#166534" : "#991b1b"; // green-800 : red-800
-  };
-
-  const generateMockCompletionRate = (date: Date) => {
-    // This is just for demo purposes
+  const generateMockData = (date: Date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dayDate = new Date(date);
+    dayDate.setHours(0, 0, 0, 0);
+    
+    const isFuture = dayDate > today;
     const day = date.getDate();
-    return (day * 3) % 100;
+    
+    // Mock 로직: 날짜에 따라 할일 유무와 완수율 결정
+    const hasTask = day % 4 !== 0; // 4의 배수 날짜는 할일 없음
+    const completionRate = hasTask ? (day * 3) % 100 : 0;
+    
+    return { hasTask, completionRate, isFuture };
   };
 
   // Generate days for the current month
@@ -62,10 +91,11 @@ const CalendarView: React.FC<CalendarViewProps> = ({
     const daysInPrevMonth = new Date(year, month, 0).getDate();
     for (let i = firstDayOfWeek - 1; i >= 0; i--) {
       const date = new Date(year, month - 1, daysInPrevMonth - i);
+      const mockData = generateMockData(date);
       days.push({
         date,
         isCurrentMonth: false,
-        completionRate: generateMockCompletionRate(date),
+        ...mockData,
       });
     }
     
@@ -73,10 +103,11 @@ const CalendarView: React.FC<CalendarViewProps> = ({
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     for (let i = 1; i <= daysInMonth; i++) {
       const date = new Date(year, month, i);
+      const mockData = generateMockData(date);
       days.push({
         date,
         isCurrentMonth: true,
-        completionRate: generateMockCompletionRate(date),
+        ...mockData,
       });
     }
     
@@ -84,10 +115,11 @@ const CalendarView: React.FC<CalendarViewProps> = ({
     const lastDayOfWeek = new Date(year, month, daysInMonth).getDay();
     for (let i = 1; i < 7 - lastDayOfWeek; i++) {
       const date = new Date(year, month + 1, i);
+      const mockData = generateMockData(date);
       days.push({
         date,
         isCurrentMonth: false,
-        completionRate: generateMockCompletionRate(date),
+        ...mockData,
       });
     }
     
@@ -104,10 +136,11 @@ const CalendarView: React.FC<CalendarViewProps> = ({
     for (let i = 0; i < 7; i++) {
       const date = new Date(weekStart);
       date.setDate(weekStart.getDate() + i);
+      const mockData = generateMockData(date);
       days.push({
         date,
         isCurrentMonth: date.getMonth() === currentDate.getMonth(),
-        completionRate: generateMockCompletionRate(date),
+        ...mockData,
       });
     }
     
@@ -205,10 +238,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
                   !day.isCurrentMonth && "text-gray-400",
                   isSelected && "!bg-primary !text-white border-2 border-primary"
                 )}
-                style={!isSelected ? {
-                  backgroundColor: getCompletionColor(day.completionRate),
-                  color: getTextColor(day.completionRate)
-                } : undefined}
+                style={!isSelected ? getDayStyle(day) : undefined}
                 onClick={() => handleDateClick(day)}
               >
                 {day.date.getDate()}
@@ -233,10 +263,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
                   "calendar-day", 
                   selectedDate.toDateString() === day.date.toDateString() && "!bg-primary !text-white border-2 border-primary"
                 )}
-                style={selectedDate.toDateString() !== day.date.toDateString() ? {
-                  backgroundColor: getCompletionColor(day.completionRate),
-                  color: getTextColor(day.completionRate)
-                } : undefined}
+                style={selectedDate.toDateString() !== day.date.toDateString() ? getDayStyle(day) : undefined}
                 onClick={() => handleDateClick(day)}
               >
                 {day.date.getDate()}
@@ -245,6 +272,47 @@ const CalendarView: React.FC<CalendarViewProps> = ({
           ))}
         </div>
       )}
+      
+      {/* 색상 범례 */}
+      <div className="mt-4 pt-3 border-t border-gray-200">
+        <div className="flex flex-wrap items-center justify-center gap-4 text-xs">
+          <div className="flex items-center gap-1">
+            <div 
+              className="w-3 h-3 rounded-full border border-gray-300"
+              style={{ backgroundColor: '#f3f4f6' }}
+            />
+            <span className="text-gray-600">미래</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div 
+              className="w-3 h-3 rounded-full border border-gray-300"
+              style={{ backgroundColor: '#e5e7eb' }}
+            />
+            <span className="text-gray-600">할일 없음</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div 
+              className="w-3 h-3 rounded-full border border-gray-300"
+              style={{ backgroundColor: 'hsl(0, 50%, 85%)' }}
+            />
+            <span className="text-gray-600">미완수</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div 
+              className="w-3 h-3 rounded-full border border-gray-300"
+              style={{ backgroundColor: 'hsl(60, 50%, 85%)' }}
+            />
+            <span className="text-gray-600">일부완수</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div 
+              className="w-3 h-3 rounded-full border border-gray-300"
+              style={{ backgroundColor: 'hsl(120, 50%, 85%)' }}
+            />
+            <span className="text-gray-600">완수</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
