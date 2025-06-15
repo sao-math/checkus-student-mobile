@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -23,6 +23,10 @@ const CalendarView: React.FC<CalendarViewProps> = ({
 }) => {
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+
+  // 오늘 날짜를 한 번만 계산
+  const today = new Date();
+  const todayString = today.toDateString();
 
   // Generate days for the current month
   const generateDays = (): CalendarDay[] => {
@@ -86,32 +90,40 @@ const CalendarView: React.FC<CalendarViewProps> = ({
     return days;
   };
 
-  const days = view === "month" ? generateDays() : generateWeekDays();
+  const days = useMemo(() => {
+    return view === "month" ? generateDays() : generateWeekDays();
+  }, [view, currentDate]);
   
-  const handleDateClick = (day: CalendarDay) => {
+  const handleDateClick = useCallback((day: CalendarDay) => {
     setSelectedDate(day.date);
+    
+    // 다른 달의 날짜를 클릭한 경우, currentDate도 해당 월로 업데이트
+    if (!day.isCurrentMonth) {
+      setCurrentDate(new Date(day.date.getFullYear(), day.date.getMonth(), 1));
+    }
+    
     onSelectDate(day.date);
-  };
+  }, [onSelectDate]);
 
-  const handlePrevious = () => {
-    const newDate = new Date(currentDate);
+  const handlePrevious = useCallback(() => {
+    const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
     if (view === "month") {
       newDate.setMonth(newDate.getMonth() - 1);
     } else {
       newDate.setDate(newDate.getDate() - 7);
     }
     setCurrentDate(newDate);
-  };
+  }, [currentDate, view]);
 
-  const handleNext = () => {
-    const newDate = new Date(currentDate);
+  const handleNext = useCallback(() => {
+    const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
     if (view === "month") {
       newDate.setMonth(newDate.getMonth() + 1);
     } else {
       newDate.setDate(newDate.getDate() + 7);
     }
     setCurrentDate(newDate);
-  };
+  }, [currentDate, view]);
 
   const formatMonthYear = (date: Date) => {
     return date.toLocaleDateString("ko-KR", { year: 'numeric', month: 'long' });
@@ -169,7 +181,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
           ))}
           {days.map((day, index) => {
             const isSelected = selectedDate.toDateString() === day.date.toDateString();
-            const isToday = new Date().toDateString() === day.date.toDateString();
+            const isToday = todayString === day.date.toDateString();
             return (
               <div 
                 key={index} 
@@ -193,7 +205,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
         <div className="flex justify-between">
           {days.map((day, index) => {
             const isSelected = selectedDate.toDateString() === day.date.toDateString();
-            const isToday = new Date().toDateString() === day.date.toDateString();
+            const isToday = todayString === day.date.toDateString();
             return (
               <div 
                 key={index}
