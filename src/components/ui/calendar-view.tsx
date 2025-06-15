@@ -128,6 +128,22 @@ const CalendarView: React.FC<CalendarViewProps> = ({
     });
   }, [view]);
 
+  // 오늘로 이동하는 핸들러
+  const handleGoToday = useCallback(() => {
+    const today = new Date();
+    onSelectDate(today);
+    
+    if (view === "month") {
+      // 월 뷰: 해당 월의 1일로 설정
+      setCurrentDate(new Date(today.getFullYear(), today.getMonth(), 1));
+    } else {
+      // 주 뷰: 오늘이 포함된 주의 시작일(일요일)로 설정
+      const weekStart = new Date(today);
+      weekStart.setDate(today.getDate() - today.getDay());
+      setCurrentDate(weekStart);
+    }
+  }, [onSelectDate, view]);
+
   const formatMonthYear = (date: Date) => {
     return date.toLocaleDateString("ko-KR", { year: 'numeric', month: 'long' });
   };
@@ -176,6 +192,13 @@ const CalendarView: React.FC<CalendarViewProps> = ({
             onClick={() => setView("week")}
           >
             주
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={handleGoToday}
+          >
+            오늘
           </Button>
         </div>
         <div className="flex items-center gap-4">
