@@ -105,24 +105,28 @@ const CalendarView: React.FC<CalendarViewProps> = ({
   }, [onSelectDate]);
 
   const handlePrevious = useCallback(() => {
-    const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-    if (view === "month") {
-      newDate.setMonth(newDate.getMonth() - 1);
-    } else {
-      newDate.setDate(newDate.getDate() - 7);
-    }
-    setCurrentDate(newDate);
-  }, [currentDate, view]);
+    setCurrentDate(prevDate => {
+      const newDate = new Date(prevDate.getFullYear(), prevDate.getMonth(), 1);
+      if (view === "month") {
+        newDate.setMonth(newDate.getMonth() - 1);
+      } else {
+        newDate.setDate(newDate.getDate() - 7);
+      }
+      return newDate;
+    });
+  }, [view]);
 
   const handleNext = useCallback(() => {
-    const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-    if (view === "month") {
-      newDate.setMonth(newDate.getMonth() + 1);
-    } else {
-      newDate.setDate(newDate.getDate() + 7);
-    }
-    setCurrentDate(newDate);
-  }, [currentDate, view]);
+    setCurrentDate(prevDate => {
+      const newDate = new Date(prevDate.getFullYear(), prevDate.getMonth(), 1);
+      if (view === "month") {
+        newDate.setMonth(newDate.getMonth() + 1);
+      } else {
+        newDate.setDate(newDate.getDate() + 7);
+      }
+      return newDate;
+    });
+  }, [view]);
 
   const formatMonthYear = (date: Date) => {
     return date.toLocaleDateString("ko-KR", { year: 'numeric', month: 'long' });
@@ -142,11 +146,16 @@ const CalendarView: React.FC<CalendarViewProps> = ({
   // selectedDate가 변경될 때 currentDate 동기화
   useEffect(() => {
     // 선택된 날짜의 월이 현재 표시하는 월과 다르면 달력을 해당 월로 이동
-    if (selectedDate.getMonth() !== currentDate.getMonth() || 
-        selectedDate.getFullYear() !== currentDate.getFullYear()) {
-      setCurrentDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1));
-    }
-  }, [selectedDate, currentDate]);
+    const selectedMonth = selectedDate.getMonth();
+    const selectedYear = selectedDate.getFullYear();
+    
+    setCurrentDate(prevDate => {
+      if (selectedMonth !== prevDate.getMonth() || selectedYear !== prevDate.getFullYear()) {
+        return new Date(selectedYear, selectedMonth, 1);
+      }
+      return prevDate;
+    });
+  }, [selectedDate]); // currentDate 의존성 제거
 
   return (
     <div className={cn("calendar-container", className)}>
