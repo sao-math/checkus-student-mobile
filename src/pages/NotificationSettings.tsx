@@ -20,9 +20,13 @@ const NotificationSettings = () => {
     channel: 'kakao' | 'discord', 
     isEnabled: boolean
   ) => {
+    console.log(`🔄 Toggle clicked - Channel: ${channel}, New value: ${isEnabled}`);
+    console.log(`📊 Current setting:`, settingGroup.deliveryMethods[channel]);
+    
     const existingSetting = settingGroup.deliveryMethods[channel];
     
     if (existingSetting) {
+      console.log(`✏️ Updating existing setting - ID: ${existingSetting.id}, enabled: ${isEnabled}`);
       // Update existing setting
       await updateSettingGroup.mutateAsync({
         notificationTypeId: settingGroup.notificationType.id,
@@ -30,6 +34,7 @@ const NotificationSettings = () => {
         setting: { enabled: isEnabled }
       });
     } else {
+      console.log(`➕ Creating new setting - enabled: ${isEnabled}`);
       // Create new setting - backend will get userId from JWT token
       await createSetting.mutateAsync({
         notificationTypeId: settingGroup.notificationType.id,
@@ -77,6 +82,8 @@ const NotificationSettings = () => {
                 const hasKakao = settingGroup.deliveryMethods.kakao?.enabled || false;
                 const hasDiscord = settingGroup.deliveryMethods.discord?.enabled || false;
 
+                console.log(`📋 ${settingGroup.notificationType.description}:`, { hasKakao, hasDiscord });
+
                 return (
                   <div key={settingGroup.notificationType.id} className="space-y-3">
                     <div className="font-medium text-gray-900">
@@ -92,9 +99,10 @@ const NotificationSettings = () => {
                         </div>
                         <Switch
                           checked={hasKakao}
-                          onCheckedChange={(checked) => 
-                            handleChannelToggle(settingGroup, 'kakao', checked)
-                          }
+                          onCheckedChange={(checked) => {
+                            console.log(`🟡 Kakao toggle: ${hasKakao} -> ${checked}`);
+                            handleChannelToggle(settingGroup, 'kakao', checked);
+                          }}
                         />
                       </div>
                       
@@ -106,9 +114,10 @@ const NotificationSettings = () => {
                         </div>
                         <Switch
                           checked={hasDiscord}
-                          onCheckedChange={(checked) => 
-                            handleChannelToggle(settingGroup, 'discord', checked)
-                          }
+                          onCheckedChange={(checked) => {
+                            console.log(`🟣 Discord toggle: ${hasDiscord} -> ${checked}`);
+                            handleChannelToggle(settingGroup, 'discord', checked);
+                          }}
                         />
                       </div>
                     </div>

@@ -62,10 +62,7 @@ export class NotificationService {
       deliveryMethods: Object.fromEntries(
         Object.entries(group.deliveryMethods).map(([key, value]) => [
           this.unmapDeliveryMethod(key),
-          {
-            ...value,
-            deliveryMethod: this.unmapDeliveryMethod(value.deliveryMethod)
-          }
+          value  // Remove the deliveryMethod mapping since it doesn't exist in simplified type
         ])
       )
     }));
@@ -81,8 +78,7 @@ export class NotificationService {
     
     // Create DTO matching backend structure
     const updateDto: NotificationSettingUpdateDto = {
-      enabled: setting.isEnabled || false,
-      advanceMinutes: setting.advanceMinutes
+      enabled: setting.enabled !== undefined ? setting.enabled : false
     };
 
     const response = await axiosInstance.put<ResponseBase<string>>(
@@ -102,8 +98,7 @@ export class NotificationService {
     
     // Create DTO matching backend structure
     const createDto: NotificationSettingUpdateDto = {
-      enabled: setting.isEnabled || false,
-      advanceMinutes: setting.advanceMinutes
+      enabled: setting.enabled !== undefined ? setting.enabled : false
     };
 
     const response = await axiosInstance.post<ResponseBase<NotificationSetting>>(
