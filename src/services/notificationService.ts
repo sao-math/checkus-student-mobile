@@ -1,5 +1,4 @@
-
-import { NotificationSettings, NotificationType, NotificationSetting } from '@/types/api';
+import { NotificationSettings, NotificationType, NotificationSetting, NotificationSettingGroup } from '@/types/api';
 
 export class NotificationService {
   private mockResponseHandler: any;
@@ -40,5 +39,38 @@ export class NotificationService {
       method: 'PUT',
       body: JSON.stringify(setting),
     });
+  }
+
+  // New methods for grouped notification settings
+  async getGroupedNotificationSettings() {
+    return this.request<NotificationSettingGroup[]>('/notifications/settings/grouped');
+  }
+
+  async updateNotificationSettingGroup(
+    notificationTypeId: string, 
+    deliveryMethod: string, 
+    setting: Partial<NotificationSetting>
+  ) {
+    return this.request<{ success: boolean }>(
+      `/notifications/settings/grouped/${notificationTypeId}/${deliveryMethod}`, 
+      {
+        method: 'PUT',
+        body: JSON.stringify(setting),
+      }
+    );
+  }
+
+  async createNotificationSetting(
+    notificationTypeId: string,
+    deliveryMethod: string,
+    setting: Partial<NotificationSetting>
+  ) {
+    return this.request<NotificationSetting>(
+      `/notifications/settings/grouped/${notificationTypeId}/${deliveryMethod}`,
+      {
+        method: 'POST',
+        body: JSON.stringify(setting),
+      }
+    );
   }
 }

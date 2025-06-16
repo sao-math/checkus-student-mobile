@@ -159,6 +159,27 @@ class ApiClient {
     return this.notificationService.updateNotificationSetting(settingId, setting);
   }
 
+  // New grouped notification settings methods
+  async getGroupedNotificationSettings() {
+    return this.notificationService.getGroupedNotificationSettings();
+  }
+
+  async updateNotificationSettingGroup(
+    notificationTypeId: string, 
+    deliveryMethod: string, 
+    setting: Partial<NotificationSetting>
+  ) {
+    return this.notificationService.updateNotificationSettingGroup(notificationTypeId, deliveryMethod, setting);
+  }
+
+  async createNotificationSetting(
+    notificationTypeId: string,
+    deliveryMethod: string,
+    setting: Partial<NotificationSetting>
+  ) {
+    return this.notificationService.createNotificationSetting(notificationTypeId, deliveryMethod, setting);
+  }
+
   // File methods
   async uploadFile(file: File) {
     return this.fileService.uploadFile(file);

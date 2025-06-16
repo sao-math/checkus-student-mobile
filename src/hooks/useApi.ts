@@ -226,6 +226,14 @@ export const useDetailedNotificationSettings = () => {
   });
 };
 
+// New hooks for grouped notification settings
+export const useGroupedNotificationSettings = () => {
+  return useQuery({
+    queryKey: ['grouped-notification-settings'],
+    queryFn: () => apiClient.getGroupedNotificationSettings(),
+  });
+};
+
 export const useUpdateNotificationSetting = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -246,6 +254,48 @@ export const useUpdateNotificationSetting = () => {
         description: "설정 저장 중 오류가 발생했습니다.",
         variant: "destructive",
       });
+    },
+  });
+};
+
+export const useUpdateNotificationSettingGroup = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ 
+      notificationTypeId, 
+      deliveryMethod, 
+      setting 
+    }: { 
+      notificationTypeId: string; 
+      deliveryMethod: string; 
+      setting: Partial<NotificationSetting> 
+    }) => 
+      apiClient.updateNotificationSettingGroup(notificationTypeId, deliveryMethod, setting),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['grouped-notification-settings'] });
+      queryClient.invalidateQueries({ queryKey: ['detailed-notification-settings'] });
+    },
+  });
+};
+
+export const useCreateNotificationSetting = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ 
+      notificationTypeId, 
+      deliveryMethod, 
+      setting 
+    }: { 
+      notificationTypeId: string; 
+      deliveryMethod: string; 
+      setting: Partial<NotificationSetting> 
+    }) => 
+      apiClient.createNotificationSetting(notificationTypeId, deliveryMethod, setting),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['grouped-notification-settings'] });
+      queryClient.invalidateQueries({ queryKey: ['detailed-notification-settings'] });
     },
   });
 };

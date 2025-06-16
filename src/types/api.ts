@@ -145,6 +145,7 @@ export interface NotificationType {
   description: string;
 }
 
+// Updated to support multiple delivery methods per notification type
 export interface NotificationSetting {
   id: string;
   userId: string;
@@ -153,6 +154,20 @@ export interface NotificationSetting {
   deliveryMethod: 'push' | 'email' | 'sms' | 'discord' | 'kakao';
   advanceMinutes: number;
   notificationType?: NotificationType;
+}
+
+// New interface for grouped notification settings by type
+export interface NotificationSettingGroup {
+  notificationType: NotificationType;
+  isEnabled: boolean; // Overall enable/disable for this notification type
+  deliveryMethods: {
+    push?: NotificationSetting;
+    email?: NotificationSetting;
+    sms?: NotificationSetting;
+    discord?: NotificationSetting;
+    kakao?: NotificationSetting;
+  };
+  advanceMinutes: number; // Common advance minutes for all delivery methods
 }
 
 // 기존 NotificationSettings는 호환성을 위해 유지

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/header";
@@ -6,48 +5,44 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronLeft } from "lucide-react";
-import { useDetailedNotificationSettings, useUpdateNotificationSetting } from "@/hooks/useApi";
+import { ChevronLeft, MessageCircle, Bot } from "lucide-react";
+import { useGroupedNotificationSettings, useUpdateNotificationSettingGroup, useCreateNotificationSetting } from "@/hooks/useApi";
+import type { NotificationSettingGroup } from "@/types/api";
 
 const NotificationSettings = () => {
   const navigate = useNavigate();
-  const { data: settings, isLoading } = useDetailedNotificationSettings();
-  const updateSetting = useUpdateNotificationSetting();
+  const { data: groupedSettings, isLoading } = useGroupedNotificationSettings();
+  const updateSettingGroup = useUpdateNotificationSettingGroup();
+  const createSetting = useCreateNotificationSetting();
 
-  const handleToggleChange = (settingId: string, isEnabled: boolean) => {
-    updateSetting.mutate({
-      settingId,
-      setting: { isEnabled }
-    });
-  };
-
-  const handleDeliveryMethodChange = (settingId: string, deliveryMethod: string) => {
-    updateSetting.mutate({
-      settingId,
-      setting: { deliveryMethod: deliveryMethod as any }
-    });
-  };
-
-  const handleAdvanceMinutesChange = (settingId: string, advanceMinutes: number) => {
-    updateSetting.mutate({
-      settingId,
-      setting: { advanceMinutes }
-    });
-  };
-
-  const handleToggleAll = () => {
-    if (!settings) return;
+  const handleChannelToggle = async (
+    settingGroup: NotificationSettingGroup, 
+    channel: 'kakao' | 'discord', 
+    isEnabled: boolean
+  ) => {
+    const existingSetting = settingGroup.deliveryMethods[channel];
     
-    const allEnabled = settings.every(setting => setting.isEnabled);
-    const newValue = !allEnabled;
-    
-    settings.forEach(setting => {
-      updateSetting.mutate({
-        settingId: setting.id,
-        setting: { isEnabled: newValue }
+    if (existingSetting) {
+      // Update existing setting
+      await updateSettingGroup.mutateAsync({
+        notificationTypeId: settingGroup.notificationType.id,
+        deliveryMethod: channel,
+        setting: { isEnabled }
       });
-    });
+    } else {
+      // Create new setting
+      await createSetting.mutateAsync({
+        notificationTypeId: settingGroup.notificationType.id,
+        deliveryMethod: channel,
+        setting: {
+          userId: 'user123', // This should come from auth context
+          notificationTypeId: settingGroup.notificationType.id,
+          isEnabled,
+          deliveryMethod: channel,
+          advanceMinutes: settingGroup.advanceMinutes
+        }
+      });
+    }
   };
 
   if (isLoading) {
@@ -60,8 +55,6 @@ const NotificationSettings = () => {
       </div>
     );
   }
-
-  const allEnabled = settings?.every(setting => setting.isEnabled) || false;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -82,85 +75,67 @@ const NotificationSettings = () => {
         
         <Card className="mb-6">
           <CardContent className="pt-6 space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="all-notifications" className="font-medium">
-                  모든 알림
-                </Label>
-                <p className="text-sm text-gray-500">
-                  모든 알림을 한 번에 켜거나 끄기
-                </p>
-              </div>
-              <Switch
-                id="all-notifications"
-                checked={allEnabled}
-                onCheckedChange={handleToggleAll}
-              />
-            </div>
-            
-            <div className="h-px bg-gray-100" />
-            
             <div className="space-y-6">
-              {settings?.map((setting) => (
-                <div key={setting.id} className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <Label className="cursor-pointer font-medium">
-                        {setting.notificationType?.description}
-                      </Label>
+              {groupedSettings?.map((settingGroup) => {
+                const hasKakao = settingGroup.deliveryMethods.kakao?.isEnabled || false;
+                const hasDiscord = settingGroup.deliveryMethods.discord?.isEnabled || false;
+
+                return (
+                  <div key={settingGroup.notificationType.id} className="space-y-3">
+                    <div className="font-medium text-gray-900">
+                      {settingGroup.notificationType.description}
                     </div>
-                    <Switch
-                      checked={setting.isEnabled}
-                      onCheckedChange={(checked) => handleToggleChange(setting.id, checked)}
-                    />
-                  </div>
-                  
-                  {setting.isEnabled && (
-                    <div className="ml-4 space-y-3 border-l-2 border-gray-100 pl-4">
-                      <div className="space-y-2">
-                        <Label className="text-sm text-gray-600">전송 방법</Label>
-                        <Select
-                          value={setting.deliveryMethod}
-                          onValueChange={(value) => handleDeliveryMethodChange(setting.id, value)}
-                        >
-                          <SelectTrigger className="h-8">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="push">푸시 알림</SelectItem>
-                            <SelectItem value="email">이메일</SelectItem>
-                            <SelectItem value="sms">SMS</SelectItem>
-                            <SelectItem value="discord">디스코드</SelectItem>
-                            <SelectItem value="kakao">카카오톡</SelectItem>
-                          </SelectContent>
-                        </Select>
+                    
+                    <div className="ml-4 space-y-3">
+                      {/* KakaoTalk Settings */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <MessageCircle className="h-4 w-4 text-yellow-500" />
+                          <Label className="text-sm">카카오톡 알림</Label>
+                        </div>
+                        <Switch
+                          checked={hasKakao}
+                          onCheckedChange={(checked) => 
+                            handleChannelToggle(settingGroup, 'kakao', checked)
+                          }
+                        />
                       </div>
                       
-                      {(setting.notificationType?.name === 'STUDY_START_10MIN_BEFORE' || 
-                        setting.notificationType?.name === 'STUDY_START_TIME') && (
-                        <div className="space-y-2">
-                          <Label className="text-sm text-gray-600">사전 알림 (분)</Label>
-                          <Select
-                            value={setting.advanceMinutes.toString()}
-                            onValueChange={(value) => handleAdvanceMinutesChange(setting.id, parseInt(value))}
-                          >
-                            <SelectTrigger className="h-8">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="0">즉시</SelectItem>
-                              <SelectItem value="5">5분 전</SelectItem>
-                              <SelectItem value="10">10분 전</SelectItem>
-                              <SelectItem value="15">15분 전</SelectItem>
-                              <SelectItem value="30">30분 전</SelectItem>
-                            </SelectContent>
-                          </Select>
+                      {/* Discord Settings */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Bot className="h-4 w-4 text-indigo-500" />
+                          <Label className="text-sm">디스코드 알림</Label>
                         </div>
-                      )}
+                        <Switch
+                          checked={hasDiscord}
+                          onCheckedChange={(checked) => 
+                            handleChannelToggle(settingGroup, 'discord', checked)
+                          }
+                        />
+                      </div>
                     </div>
-                  )}
-                </div>
-              ))}
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Information Card */}
+        <Card className="bg-blue-50 border-blue-200">
+          <CardContent className="pt-6">
+            <div className="space-y-2">
+              <h3 className="font-medium text-blue-900">알림 설정 안내</h3>
+              <div className="text-sm text-blue-700 space-y-1">
+                <p>• 각 알림 유형별로 카카오톡과 디스코드를 독립적으로 설정할 수 있습니다.</p>
+                <p>• <strong>공부시작 알림</strong>: 학습 시작 전과 시작 시간에 알림을 받을 수 있습니다.</p>
+                <p>• <strong>미입장 알림</strong>: 예정된 시간에 스터디룸 입장이 확인되지 않을 때 발송되는 중요한 알림입니다.</p>
+                <p>• <strong>입장 완료 알림</strong>: 스터디룸 입장이 성공적으로 완료되었을 때 확인 알림을 받습니다.</p>
+                <p>• <strong>학습 알림</strong>: 오늘의 과제와 미완료 과제에 대한 정보를 받을 수 있습니다.</p>
+                <p>• 카카오톡 알림을 받으려면 휴대폰 번호가 등록되어 있어야 합니다.</p>
+                <p>• 디스코드 알림을 받으려면 디스코드 ID가 등록되어 있어야 합니다.</p>
+              </div>
             </div>
           </CardContent>
         </Card>

@@ -1,6 +1,6 @@
 import { mockUser, mockUsers, mockConnectedStudents, mockStudentsWithProfile } from './mock/mockUsers';
 import { mockTasks } from './mock/mockTasks';
-import { mockNotificationTypes, mockNotificationSettings } from './mock/mockNotifications';
+import { mockNotificationTypes, mockNotificationSettings, mockGroupedNotificationSettings } from './mock/mockNotifications';
 import { generateStudyTimesWithActuals } from './mock/mockStudyTimes';
 import { mockGuardianRequests, mockSchools } from './mock/mockOther';
 
@@ -51,7 +51,11 @@ export class MockResponseHandler {
     // 알림 설정
     if (endpoint === '/notifications/types') return mockNotificationTypes;
     if (endpoint === '/notifications/settings/detailed') return mockNotificationSettings;
+    if (endpoint === '/notifications/settings/grouped') return mockGroupedNotificationSettings;
     if (endpoint.includes('/notifications/settings/') && options.method === 'PUT') {
+      return { success: true };
+    }
+    if (endpoint.includes('/notifications/settings/grouped/') && (options.method === 'PUT' || options.method === 'POST')) {
       return { success: true };
     }
 
