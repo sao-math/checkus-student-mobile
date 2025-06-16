@@ -27,7 +27,7 @@ const NotificationSettings = () => {
       await updateSettingGroup.mutateAsync({
         notificationTypeId: settingGroup.notificationType.id,
         deliveryMethod: channel,
-        setting: { isEnabled }
+        setting: { enabled: isEnabled }
       });
     } else {
       // Create new setting - backend will get userId from JWT token
@@ -35,8 +35,8 @@ const NotificationSettings = () => {
         notificationTypeId: settingGroup.notificationType.id,
         deliveryMethod: channel,
         setting: {
-          isEnabled,
-          advanceMinutes: settingGroup.advanceMinutes || 0
+          enabled: isEnabled
+          // advanceMinutes는 그룹 레벨에서만 관리됨
         }
       });
     }
@@ -74,8 +74,8 @@ const NotificationSettings = () => {
           <CardContent className="pt-6 space-y-6">
             <div className="space-y-6">
               {groupedSettings?.map((settingGroup) => {
-                const hasKakao = settingGroup.deliveryMethods.kakao?.isEnabled || false;
-                const hasDiscord = settingGroup.deliveryMethods.discord?.isEnabled || false;
+                const hasKakao = settingGroup.deliveryMethods.kakao?.enabled || false;
+                const hasDiscord = settingGroup.deliveryMethods.discord?.enabled || false;
 
                 return (
                   <div key={settingGroup.notificationType.id} className="space-y-3">

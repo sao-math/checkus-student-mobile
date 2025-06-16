@@ -138,28 +138,22 @@ export interface LoginData {
   password: string;
 }
 
-// 새로운 알림 타입 정의
+// 새로운 알림 타입 정의 (간소화됨)
 export interface NotificationType {
   id: string;
-  name: string;
-  description: string;
+  description: string; // name 필드 제거 - 백엔드와 일치
 }
 
-// Updated to support multiple delivery methods per notification type
+// 간소화된 알림 설정 (백엔드 DTO와 일치)
 export interface NotificationSetting {
   id: string;
-  userId: string;
-  notificationTypeId: string;
-  isEnabled: boolean;
-  deliveryMethod: 'push' | 'email' | 'sms' | 'discord' | 'kakao';
-  advanceMinutes: number;
-  notificationType?: NotificationType;
+  enabled: boolean;  // 백엔드에서 "enabled"로 오므로 일치시킴
+  // 불필요한 필드들 제거: userId, notificationTypeId, deliveryMethod, advanceMinutes, notificationType
 }
 
-// New interface for grouped notification settings by type
+// 그룹화된 알림 설정 (간소화됨)
 export interface NotificationSettingGroup {
-  notificationType: NotificationType;
-  isEnabled: boolean; // Overall enable/disable for this notification type
+  notificationType: NotificationType; // 간소화된 타입
   deliveryMethods: {
     push?: NotificationSetting;
     email?: NotificationSetting;
@@ -167,7 +161,8 @@ export interface NotificationSettingGroup {
     discord?: NotificationSetting;
     kakao?: NotificationSetting;
   };
-  advanceMinutes: number; // Common advance minutes for all delivery methods
+  advanceMinutes: number; // 공통 사전 알림 시간
+  // isEnabled 필드 제거 - 개별 채널로 판단
 }
 
 // 기존 NotificationSettings는 호환성을 위해 유지
