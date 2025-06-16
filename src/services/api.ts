@@ -28,7 +28,7 @@ class ApiClient {
     this.taskService = new TaskService(this.mockResponseHandler);
     this.studyTimeService = new StudyTimeService();
     this.guardianService = new GuardianService(this.mockResponseHandler);
-    this.notificationService = new NotificationService(this.mockResponseHandler);
+    this.notificationService = new NotificationService();
     this.fileService = new FileService(this.mockResponseHandler);
   }
 

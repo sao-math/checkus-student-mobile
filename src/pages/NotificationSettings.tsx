@@ -30,16 +30,13 @@ const NotificationSettings = () => {
         setting: { isEnabled }
       });
     } else {
-      // Create new setting
+      // Create new setting - backend will get userId from JWT token
       await createSetting.mutateAsync({
         notificationTypeId: settingGroup.notificationType.id,
         deliveryMethod: channel,
         setting: {
-          userId: 'user123', // This should come from auth context
-          notificationTypeId: settingGroup.notificationType.id,
           isEnabled,
-          deliveryMethod: channel,
-          advanceMinutes: settingGroup.advanceMinutes
+          advanceMinutes: settingGroup.advanceMinutes || 0
         }
       });
     }
