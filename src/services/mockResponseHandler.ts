@@ -1,6 +1,5 @@
 import { mockUser, mockUsers, mockConnectedStudents, mockStudentsWithProfile } from './mock/mockUsers';
 import { mockTasks } from './mock/mockTasks';
-import { mockNotificationTypes, mockNotificationSettings, mockGroupedNotificationSettings } from './mock/mockNotifications';
 import { generateStudyTimesWithActuals } from './mock/mockStudyTimes';
 import { mockGuardianRequests, mockSchools } from './mock/mockOther';
 
@@ -48,26 +47,7 @@ export class MockResponseHandler {
     // 학생 ID
     if (endpoint === '/student/id') return { studentId: 'student_hong123' };
 
-    // 알림 설정
-    if (endpoint === '/notifications/types') return mockNotificationTypes;
-    if (endpoint === '/notifications/settings/detailed') return mockNotificationSettings;
-    if (endpoint === '/notifications/settings/grouped') return mockGroupedNotificationSettings;
-    if (endpoint.includes('/notifications/settings/') && options.method === 'PUT') {
-      return { success: true };
-    }
-    if (endpoint.includes('/notifications/settings/grouped/') && (options.method === 'PUT' || options.method === 'POST')) {
-      return { success: true };
-    }
-
-    // 기존 알림 설정 (호환성)
-    if (endpoint === '/notifications/settings') {
-      return {
-        taskReminders: true,
-        studyTimeAlerts: true,
-        guardianUpdates: false,
-        emailNotifications: true
-      };
-    }
+    // 알림 설정 관련 모든 mock 처리 제거 - 실제 API 사용
 
     return { success: true };
   }
