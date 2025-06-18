@@ -15,6 +15,9 @@ const NotificationSettings = () => {
   const updateSettingGroup = useUpdateNotificationSettingGroup();
   const createSetting = useCreateNotificationSetting();
 
+  // 디버깅용 - 원시 데이터 출력
+  console.log('🔍 Raw groupedSettings data:', groupedSettings);
+
   const handleChannelToggle = async (
     settingGroup: NotificationSettingGroup, 
     channel: 'kakao' | 'discord', 
@@ -24,6 +27,11 @@ const NotificationSettings = () => {
     console.log(`📊 Current setting:`, settingGroup.deliveryMethods[channel]);
     
     const existingSetting = settingGroup.deliveryMethods[channel];
+    
+    if (existingSetting && existingSetting.changeable === false) {
+      console.log(`🚫 Setting is not changeable - Channel: ${channel}`);
+      return;
+    }
     
     if (existingSetting) {
       console.log(`✏️ Updating existing setting - ID: ${existingSetting.id}, enabled: ${isEnabled}`);
@@ -79,10 +87,23 @@ const NotificationSettings = () => {
           <CardContent className="pt-6 space-y-6">
             <div className="space-y-6">
               {groupedSettings?.map((settingGroup) => {
-                const hasKakao = settingGroup.deliveryMethods.kakao?.enabled || false;
-                const hasDiscord = settingGroup.deliveryMethods.discord?.enabled || false;
+                // 실제 값 사용 (|| false 제거하여 실제 false 값도 제대로 표시)
+                const hasKakao = settingGroup.deliveryMethods.kakao?.enabled ?? false;
+                const hasDiscord = settingGroup.deliveryMethods.discord?.enabled ?? false;
+                
+                const kakaoChangeable = settingGroup.deliveryMethods.kakao?.changeable !== false;
+                const discordChangeable = settingGroup.deliveryMethods.discord?.changeable !== false;
+                
+                // 카카오톡/디스코드 설정이 존재하는지 확인
+                const hasKakaoSetting = !!settingGroup.deliveryMethods.kakao;
+                const hasDiscordSetting = !!settingGroup.deliveryMethods.discord;
 
-                console.log(`📋 ${settingGroup.notificationType.description}:`, { hasKakao, hasDiscord });
+                console.log(`📋 ${settingGroup.notificationType.description}:`, { 
+                  hasKakao, hasDiscord, kakaoChangeable, discordChangeable,
+                  hasKakaoSetting, hasDiscordSetting,
+                  kakaoSetting: settingGroup.deliveryMethods.kakao,
+                  discordSetting: settingGroup.deliveryMethods.discord
+                });
 
                 return (
                   <div key={settingGroup.notificationType.id} className="space-y-3">
@@ -91,35 +112,53 @@ const NotificationSettings = () => {
                     </div>
                     
                     <div className="ml-4 space-y-3">
-                      {/* KakaoTalk Settings */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <MessageCircle className="h-4 w-4 text-yellow-500" />
-                          <Label className="text-sm">카카오톡 알림</Label>
+                      {/* KakaoTalk Settings - 설정이 존재하면 보여줌 */}
+                      {hasKakaoSetting && (
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <MessageCircle className="h-4 w-4 text-yellow-500" />
+                            <Label className={`text-sm ${!kakaoChangeable ? 'text-gray-500' : ''}`}>
+                              카카오톡 알림
+                              {!kakaoChangeable && <span className="text-xs text-gray-400 ml-1">(변경불가)</span>}
+                            </Label>
+                          </div>
+                          <Switch
+                            checked={hasKakao}
+                            disabled={!kakaoChangeable}
+                            onCheckedChange={(checked) => {
+                              if (kakaoChangeable) {
+                                console.log(`🟡 Kakao toggle: ${hasKakao} -> ${checked}`);
+                                handleChannelToggle(settingGroup, 'kakao', checked);
+                              }
+                            }}
+                            className={!kakaoChangeable ? 'opacity-50 cursor-not-allowed' : ''}
+                          />
                         </div>
-                        <Switch
-                          checked={hasKakao}
-                          onCheckedChange={(checked) => {
-                            console.log(`🟡 Kakao toggle: ${hasKakao} -> ${checked}`);
-                            handleChannelToggle(settingGroup, 'kakao', checked);
-                          }}
-                        />
-                      </div>
+                      )}
                       
-                      {/* Discord Settings */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Bot className="h-4 w-4 text-indigo-500" />
-                          <Label className="text-sm">디스코드 알림</Label>
+                      {/* Discord Settings - 설정이 존재하면 보여줌 */}
+                      {hasDiscordSetting && (
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Bot className="h-4 w-4 text-indigo-500" />
+                            <Label className={`text-sm ${!discordChangeable ? 'text-gray-500' : ''}`}>
+                              디스코드 알림
+                              {!discordChangeable && <span className="text-xs text-gray-400 ml-1">(변경불가)</span>}
+                            </Label>
+                          </div>
+                          <Switch
+                            checked={hasDiscord}
+                            disabled={!discordChangeable}
+                            onCheckedChange={(checked) => {
+                              if (discordChangeable) {
+                                console.log(`🟣 Discord toggle: ${hasDiscord} -> ${checked}`);
+                                handleChannelToggle(settingGroup, 'discord', checked);
+                              }
+                            }}
+                            className={!discordChangeable ? 'opacity-50 cursor-not-allowed' : ''}
+                          />
                         </div>
-                        <Switch
-                          checked={hasDiscord}
-                          onCheckedChange={(checked) => {
-                            console.log(`🟣 Discord toggle: ${hasDiscord} -> ${checked}`);
-                            handleChannelToggle(settingGroup, 'discord', checked);
-                          }}
-                        />
-                      </div>
+                      )}
                     </div>
                   </div>
                 );
@@ -139,6 +178,7 @@ const NotificationSettings = () => {
                 <p>• <strong>미입장 알림</strong>: 예정된 시간에 스터디룸 입장이 확인되지 않을 때 발송되는 중요한 알림입니다.</p>
                 <p>• <strong>입장 완료 알림</strong>: 스터디룸 입장이 성공적으로 완료되었을 때 확인 알림을 받습니다.</p>
                 <p>• <strong>학습 알림</strong>: 오늘의 과제와 미완료 과제에 대한 정보를 받을 수 있습니다.</p>
+                <p>• <span className="text-gray-600">(변경불가)</span> 표시된 알림은 학습 관리상 필수이므로 변경할 수 없습니다.</p>
                 <p>• 카카오톡 알림을 받으려면 휴대폰 번호가 등록되어 있어야 합니다.</p>
                 <p>• 디스코드 알림을 받으려면 디스코드 ID가 등록되어 있어야 합니다.</p>
               </div>

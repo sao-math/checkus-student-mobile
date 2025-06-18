@@ -148,6 +148,7 @@ export interface NotificationType {
 export interface NotificationSetting {
   id: string;
   enabled: boolean;  // 백엔드에서 "enabled"로 오므로 일치시킴
+  changeable?: boolean;  // 사용자가 이 설정을 변경할 수 있는지 여부 (기본값: true)
   // 불필요한 필드들 제거: userId, notificationTypeId, deliveryMethod, advanceMinutes, notificationType
 }
 
