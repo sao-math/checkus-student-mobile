@@ -25,7 +25,8 @@ export const Register: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordStrength, setPasswordStrength] = useState({
     hasMinLength: false,
-    hasLetter: false,
+    hasUppercase: false,
+    hasLowercase: false,
     hasNumber: false,
     hasSpecial: false
   });
@@ -60,7 +61,8 @@ export const Register: React.FC = () => {
     const password = formData.password;
     setPasswordStrength({
       hasMinLength: password.length >= 8,
-      hasLetter: /[a-zA-Z]/.test(password),
+      hasUppercase: /[A-Z]/.test(password),
+      hasLowercase: /[a-z]/.test(password),
       hasNumber: /[0-9]/.test(password),
       hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(password)
     });
@@ -229,12 +231,6 @@ export const Register: React.FC = () => {
             </CardHeader>
             
             <CardContent className="space-y-4">
-              {error && (
-                <div className="bg-red-50 text-red-500 text-sm p-3 rounded">
-                  {error}
-                </div>
-              )}
-
               <RadioGroup
                 defaultValue="student"
                 value={role}
@@ -300,9 +296,15 @@ export const Register: React.FC = () => {
                       </div>
                       <div className={cn(
                         "text-xs flex items-center gap-1",
-                        passwordStrength.hasLetter ? "text-green-600" : "text-gray-500"
+                        passwordStrength.hasUppercase ? "text-green-600" : "text-gray-500"
                       )}>
-                        {passwordStrength.hasLetter ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />} 영문자 포함
+                        {passwordStrength.hasUppercase ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />} 영문 대문자 포함
+                      </div>
+                      <div className={cn(
+                        "text-xs flex items-center gap-1",
+                        passwordStrength.hasLowercase ? "text-green-600" : "text-gray-500"
+                      )}>
+                        {passwordStrength.hasLowercase ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />} 영문 소문자 포함
                       </div>
                       <div className={cn(
                         "text-xs flex items-center gap-1",
@@ -476,6 +478,11 @@ export const Register: React.FC = () => {
             </CardContent>
 
             <CardFooter className="flex-col gap-3">
+              {error && (
+                <div className="bg-red-50 text-red-500 text-sm p-3 rounded w-full">
+                  {error}
+                </div>
+              )}
               <Button
                 type="submit"
                 className="w-full"
