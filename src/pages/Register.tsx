@@ -290,12 +290,6 @@ export const Register: React.FC = () => {
                     <div className="grid grid-cols-2 gap-1">
                       <div className={cn(
                         "text-xs flex items-center gap-1",
-                        passwordStrength.hasMinLength ? "text-green-600" : "text-gray-500"
-                      )}>
-                        {passwordStrength.hasMinLength ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />} 8자 이상
-                      </div>
-                      <div className={cn(
-                        "text-xs flex items-center gap-1",
                         passwordStrength.hasUppercase ? "text-green-600" : "text-gray-500"
                       )}>
                         {passwordStrength.hasUppercase ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />} 영문 대문자 포함
@@ -317,6 +311,12 @@ export const Register: React.FC = () => {
                         passwordStrength.hasSpecial ? "text-green-600" : "text-gray-500"
                       )}>
                         {passwordStrength.hasSpecial ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />} 특수문자 포함
+                      </div>
+                      <div className={cn(
+                        "text-xs flex items-center gap-1",
+                        passwordStrength.hasMinLength ? "text-green-600" : "text-gray-500"
+                      )}>
+                        {passwordStrength.hasMinLength ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />} 8자 이상
                       </div>
                     </div>
                   </div>
