@@ -22,12 +22,14 @@ export const Login: React.FC = () => {
   const { login } = useAuth();
 
   // Get success message from location state if available
+  const [showSuccessMessage, setShowSuccessMessage] = useState(true);
   const successMessage = location.state?.message;
   const isFromRegistration = location.state?.from === 'registration';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setShowSuccessMessage(false);
     setIsLoading(true);
 
     try {
@@ -74,7 +76,7 @@ export const Login: React.FC = () => {
             <CardTitle className="text-2xl font-bold text-center">로그인</CardTitle>
           </CardHeader>
           <form onSubmit={handleSubmit}>
-            {isFromRegistration && successMessage && (
+            {isFromRegistration && successMessage && showSuccessMessage && (
               <Alert>
                 <AlertDescription>{successMessage}</AlertDescription>
               </Alert>
