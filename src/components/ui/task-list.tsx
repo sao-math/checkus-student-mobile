@@ -5,6 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import { Task, StudyTimeWithActuals } from "@/types/api";
+import { formatKoreanTime } from "@/utils/dateUtils";
 
 interface TaskListProps {
   date: Date;
@@ -34,11 +35,7 @@ const TaskList: React.FC<TaskListProps> = ({
 
   // 시간 포맷팅 함수
   const formatTime = (isoString: string) => {
-    return new Date(isoString).toLocaleTimeString("ko-KR", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true
-    });
+    return formatKoreanTime(isoString, 'a h:mm');
   };
 
   return (

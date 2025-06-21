@@ -6,6 +6,7 @@ import TaskModal from "@/components/ui/task-modal";
 import { useTasks, useStudyTimes, useTaskComplete, useTaskUncomplete } from "@/hooks/useApi";
 import { useAuth } from "@/contexts/AuthContext";
 import { Task, StudyTimeWithActuals } from "@/types/api";
+import { formatLocalDateTimeToUtc } from "@/utils/dateUtils";
 
 const Dashboard = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -25,53 +26,10 @@ const Dashboard = () => {
     const endDate = new Date(selectedDate);
     endDate.setHours(23, 59, 59, 999);  // 당일 23:59:59
     
-    // 로컬 시간대를 고려한 ISO 문자열 생성
-    const formatLocalDateTime = (date: Date) => {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      const hours = String(date.getHours()).padStart(2, '0');
-      const minutes = String(date.getMinutes()).padStart(2, '0');
-      const seconds = String(date.getSeconds()).padStart(2, '0');
-      const ms = String(date.getMilliseconds()).padStart(3, '0');
-      
-      return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${ms}`;
-    };
-    
-    /* 
-    TODO: 나중에 개선할 수 있는 날짜 범위 옵션들
-    
-    옵션 1: 캐싱을 위한 넓은 범위 조회 (현재 대신 사용하던 방식)
-    const startDate = new Date(selectedDate);
-    startDate.setDate(startDate.getDate() - 7);  // 7일 전
-    const endDate = new Date(selectedDate);
-    endDate.setDate(endDate.getDate() + 7);      // 7일 후
-    
-    옵션 2: 달력 뷰에 따른 동적 범위
-    if (calendarView === 'month') {
-      // 해당 월 전체
-      startDate.setDate(1);
-      endDate.setMonth(endDate.getMonth() + 1, 0);
-    } else if (calendarView === 'week') {
-      // 해당 주 전체  
-      const dayOfWeek = startDate.getDay();
-      startDate.setDate(startDate.getDate() - dayOfWeek);
-      endDate.setDate(startDate.getDate() + 6);
-    }
-    
-    옵션 3: 더 큰 범위로 캐싱 효과 극대화
-    startDate.setDate(startDate.getDate() - 30);  // 30일 전
-    endDate.setDate(endDate.getDate() + 30);      // 30일 후
-    
-    옵션 4: 사용자 설정 가능한 범위
-    const userPreferredRange = getUserPreference('dateRange') || 7;
-    startDate.setDate(startDate.getDate() - userPreferredRange);
-    endDate.setDate(endDate.getDate() + userPreferredRange);
-    */
-    
+    // 로컬 시간대를 고려한 UTC 변환
     return {
-      startDate: formatLocalDateTime(startDate),
-      endDate: formatLocalDateTime(endDate)
+      startDate: formatLocalDateTimeToUtc(startDate),
+      endDate: formatLocalDateTimeToUtc(endDate)
     };
   }, [selectedDate]);
 
