@@ -11,7 +11,14 @@ export const formatKoreanTime = (utcTimeString: string, formatPattern: string = 
   if (!utcTimeString) return '';
   
   try {
-    const date = new Date(utcTimeString);
+    // Ensure the time string is treated as UTC
+    let timeString = utcTimeString;
+    if (timeString.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/) && !timeString.endsWith('Z')) {
+      // Add Z to indicate UTC if it's in YYYY-MM-DDTHH:mm:ss format without timezone
+      timeString = timeString + 'Z';
+    }
+    
+    const date = new Date(timeString);
     
     // Check if the date is invalid
     if (isNaN(date.getTime())) {
