@@ -14,12 +14,13 @@ const Dashboard = () => {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [calendarView, setCalendarView] = useState<"month" | "week">("month");
-  const [showDebug, setShowDebug] = useState(false);
+  // const [showDebug, setShowDebug] = useState(false); // Hidden for production
 
   // Auth 정보 가져오기
   const { user } = useAuth();
 
-  // 디버그 핸들러들
+  // 디버그 핸들러들 - Hidden for production
+  /*
   const handleDebugTokens = () => {
     authService.debugTokenStatus();
   };
@@ -32,6 +33,7 @@ const Dashboard = () => {
       console.error('Manual refresh failed:', error);
     }
   };
+  */
 
   // 선택된 날짜를 기준으로 조회 범위 계산
   const dateRange = useMemo(() => {
@@ -135,7 +137,8 @@ const Dashboard = () => {
       <div className="container max-w-md mx-auto p-4">
         <h1 className="text-2xl font-bold mb-6">내 학습 일정</h1>
         
-        {/* 토큰 관리 디버그 섹션 */}
+        {/* 토큰 관리 디버그 섹션 - Hidden for production */}
+        {/* 
         <div className="mb-4">
           <button 
             onClick={() => setShowDebug(!showDebug)}
@@ -169,6 +172,7 @@ const Dashboard = () => {
             </div>
           )}
         </div>
+        */}
         
         <CalendarView 
           onSelectDate={handleDateSelect} 
