@@ -158,7 +158,6 @@ const StudentFields: React.FC<StudentFieldsProps> = ({
                       value={school.name}
                       onSelect={() => handleSchoolSelectAndClose(school.name)}
                     >
-                      <School className="h-4 w-4 mr-3 text-gray-500" />
                       {school.name}
                       <Check
                         className={cn(
@@ -179,7 +178,6 @@ const StudentFields: React.FC<StudentFieldsProps> = ({
                         onSelect={() => handleSchoolSelectAndClose("학교 없음")}
                         className="text-gray-600"
                       >
-                        <Building2 className="h-4 w-4 mr-3 text-gray-500" />
                         학교 없음
                         <Check
                           className={cn(
