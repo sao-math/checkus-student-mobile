@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { RegisterFormData, RegisterFormErrors } from "../types/registerTypes";
 import { usePasswordValidation } from "./usePasswordValidation";
 
@@ -9,7 +8,7 @@ export const useRegisterFormData = (initialRole: string = "student") => {
     username: "",
     password: "",
     confirmPassword: "",
-    phoneNumber: "",
+    phoneNumber: "010",
     role: initialRole,
     gender: "",
     school: "",
@@ -22,24 +21,41 @@ export const useRegisterFormData = (initialRole: string = "student") => {
   const { passwordStrength, passwordsMatch, isPasswordValid } = 
     usePasswordValidation(formData.password, formData.confirmPassword);
 
+  // Initialize phone number with '010' when component mounts
+  useEffect(() => {
+    if (!formData.phoneNumber) {
+      setFormData(prev => ({
+        ...prev,
+        phoneNumber: '010'
+      }));
+    }
+  }, []);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     
     if (name === 'phoneNumber') {
-      // 숫자가 아닌 문자 제거
-      const digitsOnly = value.replace(/\D/g, '');
+      // Remove all non-digit characters
+      const numbers = value.replace(/\D/g, '');
       
-      // 전화번호 형식으로 포맷팅
-      let formattedValue = '';
-      if (digitsOnly.length <= 3) {
-        formattedValue = digitsOnly;
-      } else if (digitsOnly.length <= 7) {
-        formattedValue = `${digitsOnly.slice(0, 3)}-${digitsOnly.slice(3)}`;
-      } else {
-        formattedValue = `${digitsOnly.slice(0, 3)}-${digitsOnly.slice(3, 7)}-${digitsOnly.slice(7, 11)}`;
+      // If empty, return just '010'
+      if (numbers.length === 0) {
+        setFormData(prev => ({ ...prev, phoneNumber: '010' }));
+        return;
       }
       
-      setFormData((prev) => ({ ...prev, [name]: formattedValue }));
+      // Format the number with hyphens
+      let formatted = '010';
+      const remainingNumbers = numbers.slice(3); // Skip the first 3 digits (010)
+      
+      if (remainingNumbers.length > 0) {
+        formatted += '-' + remainingNumbers.slice(0, 4);
+        if (remainingNumbers.length > 4) {
+          formatted += '-' + remainingNumbers.slice(4, 8);
+        }
+      }
+      
+      setFormData((prev) => ({ ...prev, [name]: formatted }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
