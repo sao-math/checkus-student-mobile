@@ -1,7 +1,7 @@
 import React from "react";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Check, School, Loader2, AlertCircle } from "lucide-react";
+import { Check, School, Loader2, AlertCircle, Building2 } from "lucide-react";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
@@ -38,6 +38,12 @@ const StudentFields: React.FC<StudentFieldsProps> = ({
   const handleSchoolPopoverOpen = (open: boolean) => {
     console.log('🔍 StudentFields: 학교 선택 팝오버 열림/닫힘:', open);
     setSchoolOpen(open);
+  };
+
+  const handleSchoolSelectAndClose = (school: string) => {
+    console.log('🏫 StudentFields: 학교 선택됨:', school);
+    handleSchoolSelect(school);
+    setSchoolOpen(false);
   };
 
   return (
@@ -89,7 +95,7 @@ const StudentFields: React.FC<StudentFieldsProps> = ({
           </PopoverTrigger>
           <PopoverContent className="w-full p-0">
             <Command>
-              <CommandInput placeholder="학교 검색..." />
+              <CommandInput placeholder="학교명을 입력하세요..." />
               <CommandEmpty>
                 {isLoading ? (
                   <div className="flex items-center justify-center p-4">
@@ -113,7 +119,35 @@ const StudentFields: React.FC<StudentFieldsProps> = ({
                     </Button>
                   </div>
                 ) : (
-                  "검색 결과가 없습니다"
+                  <div className="p-3 space-y-3">
+                    <div className="text-center space-y-1">
+                      <p className="text-sm text-gray-600">검색 결과가 없습니다</p>
+                      <p className="text-xs text-gray-500">다른 키워드로 검색해보시거나,</p>
+                      <p className="text-xs text-gray-500">아래 옵션을 선택해주세요</p>
+                    </div>
+                    
+                    <div className="border rounded-lg">
+                      <div 
+                        className="flex items-center gap-3 p-3 hover:bg-blue-50 rounded-lg cursor-pointer transition-colors"
+                        onClick={() => {
+                          console.log('🏫 StudentFields: 학교 없음 선택됨');
+                          handleSchoolSelectAndClose("학교 없음");
+                        }}
+                      >
+                        <Building2 className="h-4 w-4 text-gray-500" />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-700">학교 없음</p>
+                          <p className="text-xs text-gray-500">해당하는 학교가 목록에 없어요</p>
+                        </div>
+                        <Check
+                          className={cn(
+                            "h-4 w-4 text-blue-500",
+                            formData.school === "학교 없음" ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                      </div>
+                    </div>
+                  </div>
                 )}
               </CommandEmpty>
               <CommandGroup>
@@ -122,11 +156,9 @@ const StudentFields: React.FC<StudentFieldsProps> = ({
                     <CommandItem
                       key={school.id}
                       value={school.name}
-                      onSelect={() => {
-                        console.log('🏫 StudentFields: 학교 선택됨:', school.name);
-                        handleSchoolSelect(school.name);
-                      }}
+                      onSelect={() => handleSchoolSelectAndClose(school.name)}
                     >
+                      <School className="h-4 w-4 mr-3 text-gray-500" />
                       {school.name}
                       <Check
                         className={cn(
@@ -136,6 +168,28 @@ const StudentFields: React.FC<StudentFieldsProps> = ({
                       />
                     </CommandItem>
                   ))}
+                  {/* 없음 옵션을 항상 표시 */}
+                  {!isLoading && schools.length > 0 && (
+                    <>
+                      <div className="px-2 py-1">
+                        <div className="border-t border-gray-200"></div>
+                      </div>
+                      <CommandItem
+                        value="학교 없음"
+                        onSelect={() => handleSchoolSelectAndClose("학교 없음")}
+                        className="text-gray-600"
+                      >
+                        <Building2 className="h-4 w-4 mr-3 text-gray-500" />
+                        학교 없음
+                        <Check
+                          className={cn(
+                            "ml-auto h-4 w-4",
+                            formData.school === "학교 없음" ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                      </CommandItem>
+                    </>
+                  )}
                 </CommandList>
               </CommandGroup>
             </Command>
