@@ -225,7 +225,7 @@ const StudentFields: React.FC<StudentFieldsProps> = ({
             <SelectItem value="12">고등학교 3학년</SelectItem>
             
             {/* 기타 */}
-            <SelectItem value="14">N수생</SelectItem>
+            <SelectItem value="13">N수생</SelectItem>
           </SelectContent>
         </Select>
         {fieldErrors.grade && (
