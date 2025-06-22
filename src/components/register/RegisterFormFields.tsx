@@ -1,10 +1,8 @@
-
 import React from "react";
 import InputWithLabel from "@/components/ui/input-with-label";
 import StudentFields from "@/components/register/StudentFields";
 import PasswordRequirements from "@/components/register/PasswordRequirements";
 import PasswordConfirmation from "@/components/register/PasswordConfirmation";
-import { schools } from "@/types/registerTypes";
 
 interface RegisterFormFieldsProps {
   formData: {
@@ -119,7 +117,6 @@ const RegisterFormFields: React.FC<RegisterFormFieldsProps> = ({
       {formData.role === "student" && (
         <StudentFields
           formData={formData}
-          schools={schools}
           schoolOpen={schoolOpen}
           setSchoolOpen={setSchoolOpen}
           handleSelectChange={handleSelectChange}

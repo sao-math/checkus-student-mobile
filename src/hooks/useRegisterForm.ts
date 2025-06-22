@@ -1,7 +1,5 @@
-
 import { useState } from "react";
 import { useRegisterFormData } from "./useRegisterFormData";
-import { schools } from "../types/registerTypes";
 
 export const useRegisterForm = (initialRole: string = "student") => {
   const [loading, setLoading] = useState(false);
@@ -47,7 +45,6 @@ export const useRegisterForm = (initialRole: string = "student") => {
     setFieldErrors,
     passwordStrength,
     passwordsMatch,
-    schools,
     handleChange,
     handleSelectChange,
     handleRoleChange,
