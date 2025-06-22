@@ -215,18 +215,17 @@ const StudentFields: React.FC<StudentFieldsProps> = ({
           </SelectTrigger>
           <SelectContent>
             {/* 중학교 */}
-            <SelectItem value="중1">중학교 1학년</SelectItem>
-            <SelectItem value="중2">중학교 2학년</SelectItem>
-            <SelectItem value="중3">중학교 3학년</SelectItem>
+            <SelectItem value="7">중학교 1학년</SelectItem>
+            <SelectItem value="8">중학교 2학년</SelectItem>
+            <SelectItem value="9">중학교 3학년</SelectItem>
             
             {/* 고등학교 */}
-            <SelectItem value="고1">고등학교 1학년</SelectItem>
-            <SelectItem value="고2">고등학교 2학년</SelectItem>
-            <SelectItem value="고3">고등학교 3학년</SelectItem>
+            <SelectItem value="10">고등학교 1학년</SelectItem>
+            <SelectItem value="11">고등학교 2학년</SelectItem>
+            <SelectItem value="12">고등학교 3학년</SelectItem>
             
             {/* 기타 */}
-            <SelectItem value="재수">재수생</SelectItem>
-            <SelectItem value="N수">N수생</SelectItem>
+            <SelectItem value="14">N수생</SelectItem>
           </SelectContent>
         </Select>
         {fieldErrors.grade && (
