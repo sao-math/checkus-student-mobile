@@ -1,5 +1,4 @@
 import axios from 'axios';
-import authService from '../services/auth';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
@@ -22,12 +21,22 @@ const axiosInstance = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true,
+  withCredentials: true, // 쿠키 전송을 위해 필요
 });
+
+// Import auth service with dynamic import to avoid circular dependency
+let authService: any = null;
+const getAuthService = async () => {
+  if (!authService) {
+    const { default: auth } = await import('../services/auth');
+    authService = auth;
+  }
+  return authService;
+};
 
 // Request interceptor
 axiosInstance.interceptors.request.use(
-  (config) => {
+  async (config) => {
     console.log('📤 axios request interceptor: 요청 설정:', {
       url: config.url,
       method: config.method,
@@ -42,13 +51,22 @@ axiosInstance.interceptors.request.use(
     }
     
     console.log('🔒 axios: 인증이 필요한 엔드포인트, 토큰 확인 중...');
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      console.log('✅ axios: 토큰 발견, Authorization 헤더 추가');
-      config.headers.Authorization = `Bearer ${token}`;
-    } else {
-      console.log('⚠️ axios: 토큰이 없음');
+    
+    try {
+      // Get access token from memory via auth service
+      const auth = await getAuthService();
+      const token = auth.getAccessToken();
+      
+      if (token) {
+        console.log('✅ axios: 토큰 발견, Authorization 헤더 추가');
+        config.headers.Authorization = `Bearer ${token}`;
+      } else {
+        console.log('⚠️ axios: 메모리에 액세스 토큰이 없음');
+      }
+    } catch (error) {
+      console.error('❌ axios request interceptor: 에러:', error);
     }
+    
     return config;
   },
   (error) => {
@@ -86,20 +104,36 @@ axiosInstance.interceptors.response.use(
     }
 
     if (error.response?.status === 401 && !originalRequest._retry) {
-      console.log('🔄 axios: 401 에러, 토큰 갱신 시도');
+      console.log('🔄 axios: 401 에러, 쿠키를 사용한 토큰 갱신 시도');
       originalRequest._retry = true;
+      
       try {
-        // No body, just POST
-        const response = await axiosInstance.post('/auth/refresh');
-        const { accessToken } = response.data.data;
-        localStorage.setItem('accessToken', accessToken);
-        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        console.log('🔄 axios: 토큰 갱신 시도 중...');
+        
+        // Try to refresh token using cookie-based refresh
+        const refreshResponse = await axios.post(`${API_URL}/auth/refresh`, {}, {
+          withCredentials: true // 쿠키의 리프레시 토큰 사용
+        });
+        
+        const { accessToken: newAccessToken } = refreshResponse.data.data;
+        
+        // Update access token in memory via auth service
+        const auth = await getAuthService();
+        auth.setAccessToken(newAccessToken);
+        
         console.log('✅ axios: 토큰 갱신 성공, 원래 요청 재시도');
+        
+        // Retry original request with new token
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         return axiosInstance(originalRequest);
       } catch (refreshError) {
         console.error('❌ axios: 토큰 갱신 실패, 로그인 페이지로 이동');
-        // Clear the token and redirect to login
-        localStorage.removeItem('accessToken');
+        
+        // Clear access token from memory
+        const auth = await getAuthService();
+        auth.clearAccessToken();
+        
+        // Redirect to login
         window.location.href = '/login';
         return Promise.reject(refreshError);
       }

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import authService from '../services/auth';
 import { LoginRequest, LoginResponse, UserInfo } from '../types/auth';
 
@@ -16,36 +16,56 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<UserInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Prevent multiple concurrent auth checks
+  const isCheckingAuth = useRef(false);
 
   useEffect(() => {
     const checkAuth = async () => {
-      const token = localStorage.getItem('accessToken');
-      if (!token) {
-        setIsAuthenticated(false);
-        setUser(null);
-        setIsLoading(false);
+      // Prevent multiple concurrent checks
+      if (isCheckingAuth.current) {
         return;
       }
-
+      
+      isCheckingAuth.current = true;
+      
       try {
-        const response = await authService.getCurrentUser();
-        if (response.success && response.data) {
-          setIsAuthenticated(true);
-          setUser(response.data);
-        } else {
-          // Token is invalid, clear it
-          localStorage.removeItem('accessToken');
+        console.log('Starting authentication check...');
+        
+        // 페이지 로드 시에는 메모리에 액세스 토큰이 없으므로
+        // 쿠키의 리프레시 토큰을 사용해서 액세스 토큰을 복구 시도
+        const initSuccess = await authService.initializeFromRefreshToken();
+        
+        if (!initSuccess) {
+          console.log('No valid refresh token found, setting unauthenticated state');
+          setIsAuthenticated(false);
+          setUser(null);
+          return;
+        }
+
+        // 액세스 토큰이 복구되었으므로 사용자 정보 조회
+        try {
+          const response = await authService.getCurrentUser();
+          if (response.success && response.data) {
+            console.log('Authentication check successful');
+            setIsAuthenticated(true);
+            setUser(response.data);
+          } else {
+            console.warn('Invalid user response, clearing access token');
+            authService.clearAccessToken();
+            setIsAuthenticated(false);
+            setUser(null);
+          }
+        } catch (error) {
+          console.error('Error checking auth:', error);
+          // 사용자 정보 조회 실패시 액세스 토큰 제거
+          authService.clearAccessToken();
           setIsAuthenticated(false);
           setUser(null);
         }
-      } catch (error) {
-        // Token is invalid or there's a network error, clear it
-        console.error('Auth check failed:', error);
-        localStorage.removeItem('accessToken');
-        setIsAuthenticated(false);
-        setUser(null);
       } finally {
         setIsLoading(false);
+        isCheckingAuth.current = false;
       }
     };
 
@@ -57,7 +77,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const response = await authService.login(data);
       if (response.success && response.data) {
         const { accessToken } = response.data;
-        localStorage.setItem('accessToken', accessToken);
+        authService.setAccessToken(accessToken);
         
         // Verify the token by getting user info
         try {
@@ -69,16 +89,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             throw new Error('Failed to verify user session');
           }
         } catch (userError) {
-          // If user verification fails, clear the token and throw error
-          localStorage.removeItem('accessToken');
+          // Clear access token if user verification fails
+          authService.clearAccessToken();
           throw new Error('Failed to verify user session');
         }
       } else {
         throw new Error(response.message || '로그인에 실패했습니다.');
       }
     } catch (error) {
-      // Clear tokens if login fails
-      localStorage.removeItem('accessToken');
+      // Clear access token if login fails
+      authService.clearAccessToken();
       setIsAuthenticated(false);
       setUser(null);
       throw error;
@@ -86,7 +106,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
-    localStorage.removeItem('accessToken');
+    authService.clearAccessToken();
     setIsAuthenticated(false);
     setUser(null);
     window.location.href = '/login';
