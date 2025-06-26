@@ -84,12 +84,6 @@ const RegisterForm = (props: any) => {
       </CardHeader>
       
       <CardContent className="space-y-4">
-        {error && (
-          <div className="bg-red-50 text-red-500 text-sm p-3 rounded">
-            {error}
-          </div>
-        )}
-
         <RegisterRoleSelection 
           role={formData.role} 
           onChange={handleRoleChange} 
@@ -106,7 +100,7 @@ const RegisterForm = (props: any) => {
         />
       </CardContent>
 
-      <RegisterFooter loading={loading} />
+      <RegisterFooter loading={loading} error={error} />
     </form>
   );
 };
