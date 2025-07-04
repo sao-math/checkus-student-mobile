@@ -6,62 +6,21 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { ChevronLeft, MessageCircle, Bot } from "lucide-react";
-import { useGroupedNotificationSettings, useUpdateNotificationSettingGroup, useCreateNotificationSetting } from "@/hooks/useApi";
-import type { NotificationSettingGroup } from "@/types/api";
+import { PageLoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { useNotificationSettingsForm } from "@/hooks/useNotificationSettingsForm";
 
 const NotificationSettings = () => {
   const navigate = useNavigate();
-  const { data: groupedSettings, isLoading } = useGroupedNotificationSettings();
-  const updateSettingGroup = useUpdateNotificationSettingGroup();
-  const createSetting = useCreateNotificationSetting();
+  const { groupedSettings, isLoading, handleChannelToggle } = useNotificationSettingsForm();
 
   // 디버깅용 - 원시 데이터 출력
   console.log('🔍 Raw groupedSettings data:', groupedSettings);
-
-  const handleChannelToggle = async (
-    settingGroup: NotificationSettingGroup, 
-    channel: 'kakao' | 'discord', 
-    isEnabled: boolean
-  ) => {
-    console.log(`🔄 Toggle clicked - Channel: ${channel}, New value: ${isEnabled}`);
-    console.log(`📊 Current setting:`, settingGroup.deliveryMethods[channel]);
-    
-    const existingSetting = settingGroup.deliveryMethods[channel];
-    
-    if (existingSetting && existingSetting.changeable === false) {
-      console.log(`🚫 Setting is not changeable - Channel: ${channel}`);
-      return;
-    }
-    
-    if (existingSetting) {
-      console.log(`✏️ Updating existing setting - ID: ${existingSetting.id}, enabled: ${isEnabled}`);
-      // Update existing setting
-      await updateSettingGroup.mutateAsync({
-        notificationTypeId: settingGroup.notificationType.id,
-        deliveryMethod: channel,
-        setting: { enabled: isEnabled }
-      });
-    } else {
-      console.log(`➕ Creating new setting - enabled: ${isEnabled}`);
-      // Create new setting - backend will get userId from JWT token
-      await createSetting.mutateAsync({
-        notificationTypeId: settingGroup.notificationType.id,
-        deliveryMethod: channel,
-        setting: {
-          enabled: isEnabled
-          // advanceMinutes는 그룹 레벨에서만 관리됨
-        }
-      });
-    }
-  };
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
-        <div className="container max-w-md mx-auto p-4">
-          <div className="text-center py-8">로딩 중...</div>
-        </div>
+        <PageLoadingSpinner text="알림 설정을 불러오는 중..." />
       </div>
     );
   }

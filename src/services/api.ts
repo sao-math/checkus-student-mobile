@@ -1,77 +1,43 @@
-import { RegisterData, LoginData, User, Task, StudyTimeWithActuals, GuardianRequest, School, NotificationSettings, NotificationSetting, NotificationType, ConnectedStudent } from '@/types/api';
-import { MockResponseHandler } from './mockResponseHandler';
-import { AuthService } from './authService';
-import { UserService } from './userService';
-import { SchoolService } from './schoolService';
+import { 
+  Task, 
+  StudyTimeWithActuals, 
+  GuardianRequest, 
+  School, 
+  NotificationSettings, 
+  NotificationSetting, 
+  NotificationType, 
+  ConnectedStudent 
+} from '@/types/api';
 import { TaskService } from './taskService';
 import { StudyTimeService } from './studyTimeService';
 import { GuardianService } from './guardianService';
 import { NotificationService } from './notificationService';
-import { FileService } from './fileService';
+import { SchoolService } from './schoolService';
+import { MockResponseHandler } from './mockResponseHandler';
 
+/**
+ * 리팩토링된 API 클라이언트
+ * 실제로 사용되는 메서드들만 제공하여 중복을 제거하고 간결성을 향상
+ */
 class ApiClient {
   private mockResponseHandler: MockResponseHandler;
-  private authService: AuthService;
-  private userService: UserService;
-  private schoolService: SchoolService;
   private taskService: TaskService;
   private studyTimeService: StudyTimeService;
   private guardianService: GuardianService;
   private notificationService: NotificationService;
-  private fileService: FileService;
+  private schoolService: SchoolService;
 
   constructor() {
     this.mockResponseHandler = new MockResponseHandler();
-    this.authService = new AuthService(this.mockResponseHandler);
-    this.userService = new UserService(this.mockResponseHandler);
-    this.schoolService = new SchoolService(this.mockResponseHandler);
     this.taskService = new TaskService(this.mockResponseHandler);
     this.studyTimeService = new StudyTimeService();
     this.guardianService = new GuardianService(this.mockResponseHandler);
     this.notificationService = new NotificationService();
-    this.fileService = new FileService(this.mockResponseHandler);
+    this.schoolService = new SchoolService(this.mockResponseHandler);
   }
 
-  // Auth methods
-  async register(data: RegisterData) {
-    return this.authService.register(data);
-  }
-
-  async login(data: LoginData) {
-    return this.authService.login(data);
-  }
-
-  async logout() {
-    return this.authService.logout();
-  }
-
-  async checkUsername(username: string) {
-    return this.authService.checkUsername(username);
-  }
-
-  async checkPhone(phoneNumber: string) {
-    return this.authService.checkPhone(phoneNumber);
-  }
-
-  // User methods
-  async getUserProfile() {
-    return this.userService.getUserProfile();
-  }
-
-  async updateUserProfile(data: Partial<User>) {
-    return this.userService.updateUserProfile(data);
-  }
-
-  // School methods
-  async getSchools() {
-    return this.schoolService.getSchools();
-  }
-
-  async searchSchools(query: string) {
-    return this.schoolService.searchSchools(query);
-  }
-
-  // Task methods
+  // ===== 할일 관리 =====
+  
   async getTasks() {
     return this.taskService.getTasks();
   }
@@ -84,32 +50,14 @@ class ApiClient {
     return this.taskService.uncompleteTask(id);
   }
 
-  // Study time methods
+  // ===== 공부 시간 관리 =====
+  
   async getStudyTimes(studentId: number, startDate?: string, endDate?: string) {
     return this.studyTimeService.getStudyTimes(studentId, startDate, endDate);
   }
 
-  async getAssignedStudyTimes(studentId: number, startDate: string, endDate: string) {
-    return this.studyTimeService.getAssignedStudyTimes(studentId, startDate, endDate);
-  }
-
-  async getActualStudyTimes(studentId: number, startDate: string, endDate: string) {
-    return this.studyTimeService.getActualStudyTimes(studentId, startDate, endDate);
-  }
-
-  async getStudyAssignableActivities() {
-    return this.studyTimeService.getStudyAssignableActivities();
-  }
-
-  async getUpcomingStudyTimes() {
-    return this.studyTimeService.getUpcomingStudyTimes();
-  }
-
-  async getCalendar() {
-    return this.studyTimeService.getCalendar();
-  }
-
-  // Guardian methods
+  // ===== 학부모 연결 관리 =====
+  
   async sendGuardianRequest(studentId: string) {
     return this.guardianService.sendGuardianRequest(studentId);
   }
@@ -126,10 +74,6 @@ class ApiClient {
     return this.guardianService.rejectGuardianRequest(requestId);
   }
 
-  async cancelGuardianRequest(requestId: string) {
-    return this.guardianService.cancelGuardianRequest(requestId);
-  }
-
   async getConnectedStudents() {
     return this.guardianService.getConnectedStudents();
   }
@@ -138,7 +82,18 @@ class ApiClient {
     return this.guardianService.getStudentId();
   }
 
-  // Notification methods
+  // ===== 학교 관리 =====
+  
+  async getSchools() {
+    return this.schoolService.getSchools();
+  }
+
+  async searchSchools(query: string) {
+    return this.schoolService.searchSchools(query);
+  }
+
+  // ===== 알림 설정 관리 =====
+  
   async getNotificationSettings() {
     return this.notificationService.getNotificationSettings();
   }
@@ -159,7 +114,6 @@ class ApiClient {
     return this.notificationService.updateNotificationSetting(settingId, setting);
   }
 
-  // New grouped notification settings methods
   async getGroupedNotificationSettings() {
     return this.notificationService.getGroupedNotificationSettings();
   }
@@ -178,11 +132,6 @@ class ApiClient {
     setting: Partial<NotificationSetting>
   ) {
     return this.notificationService.createNotificationSetting(notificationTypeId, deliveryMethod, setting);
-  }
-
-  // File methods
-  async uploadFile(file: File) {
-    return this.fileService.uploadFile(file);
   }
 }
 

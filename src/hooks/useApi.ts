@@ -2,18 +2,19 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/services/api';
 import { useToast } from '@/components/ui/use-toast';
 import { NotificationSetting } from '@/types/api';
+import { useMutationWithToast } from './useMutationWithToast';
+import { useSimpleQuery } from './useSimpleQuery';
 
-// 대시보드 데이터 훅
+// ===== 대시보드 데이터 훅 =====
 export const useTasks = () => {
-  return useQuery({
+  return useSimpleQuery({
     queryKey: ['tasks'],
     queryFn: () => apiClient.getTasks(),
   });
 };
 
-// 수정된 스터디 타임 훅 - 새로운 타입 사용
 export const useStudyTimes = (studentId?: number, startDate?: string, endDate?: string) => {
-  return useQuery({
+  return useSimpleQuery({
     queryKey: ['study-times', studentId, startDate, endDate],
     queryFn: () => {
       if (!studentId) {
@@ -21,247 +22,146 @@ export const useStudyTimes = (studentId?: number, startDate?: string, endDate?: 
       }
       return apiClient.getStudyTimes(studentId, startDate, endDate);
     },
-    enabled: !!studentId, // Only run query if studentId is provided
+    enabled: !!studentId,
   });
 };
 
-// 할일 완료/취소 훅
+// ===== 할일 관련 훅 =====
 export const useTaskComplete = () => {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-
-  return useMutation({
+  return useMutationWithToast({
     mutationFn: ({ id, photoFile }: { id: string; photoFile?: File }) =>
       apiClient.completeTask(id, photoFile),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
-      toast({
-        title: "할일 완료!",
-        description: "할일이 완료 처리되었습니다.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "오류 발생",
-        description: "할일 완료 처리 중 오류가 발생했습니다.",
-        variant: "destructive",
-      });
-    },
+    successMessage: "할일 완료!",
+    errorMessage: "할일 완료 처리 중 오류가 발생했습니다.",
+    invalidateKeys: [['tasks']],
   });
 };
 
 export const useTaskUncomplete = () => {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-
-  return useMutation({
+  return useMutationWithToast({
     mutationFn: (id: string) => apiClient.uncompleteTask(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
-      toast({
-        title: "할일 완료 취소",
-        description: "할일이 미완료 상태로 변경되었습니다.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "오류 발생",
-        description: "할일 취소 처리 중 오류가 발생했습니다.",
-        variant: "destructive",
-      });
-    },
+    successMessage: "할일 완료 취소",
+    errorMessage: "할일 취소 처리 중 오류가 발생했습니다.",
+    invalidateKeys: [['tasks']],
   });
 };
 
-// 학부모 연결 관련 훅
+// ===== 학부모 연결 관련 훅 =====
 export const useGuardianRequests = () => {
-  return useQuery({
+  return useSimpleQuery({
     queryKey: ['guardian-requests'],
     queryFn: () => apiClient.getGuardianRequests(),
   });
 };
 
 export const useSendGuardianRequest = () => {
-  const { toast } = useToast();
-
-  return useMutation({
+  return useMutationWithToast({
     mutationFn: (studentId: string) => apiClient.sendGuardianRequest(studentId),
-    onSuccess: () => {
-      toast({
-        title: "연결 요청 전송 완료",
-        description: "학생이 요청을 승인하면 목록에 추가됩니다.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "오류 발생",
-        description: "연결 요청 전송 중 오류가 발생했습니다.",
-        variant: "destructive",
-      });
-    },
+    successMessage: "연결 요청 전송 완료",
+    errorMessage: "연결 요청 전송 중 오류가 발생했습니다.",
   });
 };
 
 export const useApproveGuardianRequest = () => {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-
-  return useMutation({
+  return useMutationWithToast({
     mutationFn: (requestId: string) => apiClient.approveGuardianRequest(requestId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['guardian-requests'] });
-      toast({
-        title: "요청 승인됨",
-        description: "이제 해당 사용자가 귀하의 학습 정보를 볼 수 있습니다.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "오류 발생",
-        description: "요청 승인 중 오류가 발생했습니다.",
-        variant: "destructive",
-      });
-    },
+    successMessage: "요청 승인됨",
+    errorMessage: "요청 승인 중 오류가 발생했습니다.",
+    invalidateKeys: [['guardian-requests']],
   });
 };
 
 export const useRejectGuardianRequest = () => {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-
-  return useMutation({
+  return useMutationWithToast({
     mutationFn: (requestId: string) => apiClient.rejectGuardianRequest(requestId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['guardian-requests'] });
-      toast({
-        title: "요청 거절됨",
-        description: "연결 요청이 거절되었습니다.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "오류 발생",
-        description: "요청 거절 중 오류가 발생했습니다.",
-        variant: "destructive",
-      });
-    },
+    successMessage: "요청 거절됨",
+    errorMessage: "요청 거절 중 오류가 발생했습니다.",
+    invalidateKeys: [['guardian-requests']],
   });
 };
 
-// 학생 ID 조회 훅
+// ===== 학생 관련 훅 =====
 export const useStudentId = () => {
-  return useQuery({
+  return useSimpleQuery({
     queryKey: ['student-id'],
     queryFn: () => apiClient.getStudentId(),
   });
 };
 
-// 연결된 학생 목록 훅 - 올바른 타입 사용
 export const useConnectedStudents = () => {
-  return useQuery({
+  return useSimpleQuery({
     queryKey: ['connected-students'],
     queryFn: () => apiClient.getConnectedStudents(),
   });
 };
 
-// 학교 검색 훅
+// ===== 학교 관련 훅 =====
 export const useSchools = () => {
-  return useQuery({
+  return useSimpleQuery({
     queryKey: ['schools'],
     queryFn: () => apiClient.getSchools(),
   });
 };
 
 export const useSearchSchools = (query: string) => {
-  return useQuery({
+  return useSimpleQuery({
     queryKey: ['schools', 'search', query],
     queryFn: () => apiClient.searchSchools(query),
     enabled: query.length > 0,
   });
 };
 
-// 알림 설정 훅
+// ===== 알림 설정 훅 =====
 export const useNotificationSettings = () => {
-  return useQuery({
+  return useSimpleQuery({
     queryKey: ['notification-settings'],
     queryFn: () => apiClient.getNotificationSettings(),
   });
 };
 
 export const useUpdateNotificationSettings = () => {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-
-  return useMutation({
+  return useMutationWithToast({
     mutationFn: (settings: any) => apiClient.updateNotificationSettings(settings),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notification-settings'] });
-      toast({
-        title: "설정 저장됨",
-        description: "알림 설정이 성공적으로 저장되었습니다.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "오류 발생",
-        description: "설정 저장 중 오류가 발생했습니다.",
-        variant: "destructive",
-      });
-    },
+    successMessage: "설정 저장됨",
+    errorMessage: "설정 저장 중 오류가 발생했습니다.",
+    invalidateKeys: [['notification-settings']],
   });
 };
 
-// 새로운 알림 관련 훅들
 export const useNotificationTypes = () => {
-  return useQuery({
+  return useSimpleQuery({
     queryKey: ['notification-types'],
     queryFn: () => apiClient.getNotificationTypes(),
   });
 };
 
 export const useDetailedNotificationSettings = () => {
-  return useQuery({
+  return useSimpleQuery({
     queryKey: ['detailed-notification-settings'],
     queryFn: () => apiClient.getDetailedNotificationSettings(),
   });
 };
 
-// New hooks for grouped notification settings
 export const useGroupedNotificationSettings = () => {
-  return useQuery({
+  return useSimpleQuery({
     queryKey: ['grouped-notification-settings'],
     queryFn: () => apiClient.getGroupedNotificationSettings(),
   });
 };
 
 export const useUpdateNotificationSetting = () => {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-
-  return useMutation({
+  return useMutationWithToast({
     mutationFn: ({ settingId, setting }: { settingId: string; setting: Partial<NotificationSetting> }) =>
       apiClient.updateNotificationSetting(settingId, setting),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['detailed-notification-settings'] });
-      toast({
-        title: "설정 저장됨",
-        description: "알림 설정이 성공적으로 저장되었습니다.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "오류 발생",
-        description: "설정 저장 중 오류가 발생했습니다.",
-        variant: "destructive",
-      });
-    },
+    successMessage: "설정 저장됨",
+    errorMessage: "설정 저장 중 오류가 발생했습니다.",
+    invalidateKeys: [['detailed-notification-settings']],
   });
 };
 
+// ===== 특수 알림 설정 훅 (다중 쿼리 무효화) =====
 export const useUpdateNotificationSettingGroup = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
+  return useMutationWithToast({
     mutationFn: ({ 
       notificationTypeId, 
       deliveryMethod, 
@@ -272,17 +172,15 @@ export const useUpdateNotificationSettingGroup = () => {
       setting: Partial<NotificationSetting> 
     }) => 
       apiClient.updateNotificationSettingGroup(notificationTypeId, deliveryMethod, setting),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['grouped-notification-settings'] });
-      queryClient.invalidateQueries({ queryKey: ['detailed-notification-settings'] });
-    },
+    invalidateKeys: [
+      ['grouped-notification-settings'],
+      ['detailed-notification-settings']
+    ],
   });
 };
 
 export const useCreateNotificationSetting = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
+  return useMutationWithToast({
     mutationFn: ({ 
       notificationTypeId, 
       deliveryMethod, 
@@ -293,9 +191,9 @@ export const useCreateNotificationSetting = () => {
       setting: Partial<NotificationSetting> 
     }) => 
       apiClient.createNotificationSetting(notificationTypeId, deliveryMethod, setting),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['grouped-notification-settings'] });
-      queryClient.invalidateQueries({ queryKey: ['detailed-notification-settings'] });
-    },
+    invalidateKeys: [
+      ['grouped-notification-settings'],
+      ['detailed-notification-settings']
+    ],
   });
 };

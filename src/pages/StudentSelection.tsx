@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { useConnectedStudents, useSendGuardianRequest } from "@/hooks/useApi";
 import { useToast } from "@/components/ui/use-toast";
+import { DashboardLoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 const StudentSelection = () => {
   const navigate = useNavigate();
@@ -73,12 +73,7 @@ const StudentSelection = () => {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
-        <div className="container max-w-md mx-auto p-4 flex items-center justify-center min-h-96">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-gray-500">데이터를 불러오는 중...</p>
-          </div>
-        </div>
+        <DashboardLoadingSpinner text="학생 목록을 불러오는 중..." />
       </div>
     );
   }
