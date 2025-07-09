@@ -60,6 +60,7 @@ const RegisterForm = (props: any) => {
             },
           });
         } else {
+          // Display specific error message from API response
           setError(response.message || "회원가입에 실패했습니다.");
         }
       } else {
@@ -71,7 +72,9 @@ const RegisterForm = (props: any) => {
         return;
       }
     } catch (err: any) {
-      setError(err?.response?.data?.message || err.message || "회원가입에 실패했습니다.");
+      // This should rarely be reached now since authService handles errors gracefully
+      console.error('Unexpected error during registration:', err);
+      setError("회원가입 중 예상치 못한 오류가 발생했습니다.");
     } finally {
       setLoading(false);
     }

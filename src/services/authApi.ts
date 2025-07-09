@@ -31,16 +31,52 @@ export const authApi = {
    * 학생 회원가입
    */
   async registerStudent(request: StudentRegisterRequest): Promise<ResponseBase<RegisterResponse>> {
-    const response = await axiosInstance.post<ResponseBase<null>>('/auth/register/student', request);
-    return response.data;
+    try {
+      const response = await axiosInstance.post<ResponseBase<RegisterResponse>>('/auth/register/student', request);
+      return response.data;
+    } catch (error: any) {
+      // Handle validation errors (400 Bad Request) and duplicate resource errors (409 Conflict)
+      if (error.response && error.response.data) {
+        const errorData = error.response.data;
+        return {
+          success: false,
+          message: errorData.message || '회원가입에 실패했습니다.',
+          data: null
+        };
+      }
+      // Handle other errors
+      return {
+        success: false,
+        message: '회원가입 중 오류가 발생했습니다.',
+        data: null
+      };
+    }
   },
 
   /**
    * 학부모 회원가입
    */
   async registerGuardian(request: GuardianRegisterRequest): Promise<ResponseBase<RegisterResponse>> {
-    const response = await axiosInstance.post<ResponseBase<null>>('/auth/register/guardian', request);
-    return response.data;
+    try {
+      const response = await axiosInstance.post<ResponseBase<RegisterResponse>>('/auth/register/guardian', request);
+      return response.data;
+    } catch (error: any) {
+      // Handle validation errors (400 Bad Request) and duplicate resource errors (409 Conflict)
+      if (error.response && error.response.data) {
+        const errorData = error.response.data;
+        return {
+          success: false,
+          message: errorData.message || '회원가입에 실패했습니다.',
+          data: null
+        };
+      }
+      // Handle other errors
+      return {
+        success: false,
+        message: '회원가입 중 오류가 발생했습니다.',
+        data: null
+      };
+    }
   },
 
   /**
@@ -73,16 +109,52 @@ export const authApi = {
    * 사용자명 중복 확인
    */
   async checkUsername(username: string): Promise<ResponseBase<boolean>> {
-    const response = await axiosInstance.get<ResponseBase<boolean>>(`/auth/check-username?username=${username}`);
-    return response.data;
+    try {
+      const response = await axiosInstance.get<ResponseBase<boolean>>(`/auth/check-username?username=${username}`);
+      return response.data;
+    } catch (error: any) {
+      // Handle 409 Conflict (duplicate username) and 400 Bad Request (invalid format)
+      if (error.response && error.response.data) {
+        const errorData = error.response.data;
+        return {
+          success: false,
+          message: errorData.message || '사용자명 확인에 실패했습니다.',
+          data: null
+        };
+      }
+      // Handle other errors
+      return {
+        success: false,
+        message: '사용자명 확인 중 오류가 발생했습니다.',
+        data: null
+      };
+    }
   },
 
   /**
    * 전화번호 중복 확인
    */
   async checkPhoneNumber(phoneNumber: string): Promise<ResponseBase<boolean>> {
-    const response = await axiosInstance.get<ResponseBase<boolean>>(`/auth/check-phone?phoneNumber=${phoneNumber}`);
-    return response.data;
+    try {
+      const response = await axiosInstance.get<ResponseBase<boolean>>(`/auth/check-phone?phoneNumber=${phoneNumber}`);
+      return response.data;
+    } catch (error: any) {
+      // Handle 409 Conflict (duplicate phone) and 400 Bad Request (invalid format)
+      if (error.response && error.response.data) {
+        const errorData = error.response.data;
+        return {
+          success: false,
+          message: errorData.message || '전화번호 확인에 실패했습니다.',
+          data: null
+        };
+      }
+      // Handle other errors
+      return {
+        success: false,
+        message: '전화번호 확인 중 오류가 발생했습니다.',
+        data: null
+      };
+    }
   },
 
   /**
