@@ -33,7 +33,7 @@ export const authApi = {
   async registerStudent(request: StudentRegisterRequest): Promise<ResponseBase<RegisterResponse>> {
     try {
       const response = await axiosInstance.post<ResponseBase<RegisterResponse>>('/auth/register/student', request);
-      return response.data;
+    return response.data;
     } catch (error: any) {
       // Handle validation errors (400 Bad Request) and duplicate resource errors (409 Conflict)
       if (error.response && error.response.data) {
@@ -59,7 +59,7 @@ export const authApi = {
   async registerGuardian(request: GuardianRegisterRequest): Promise<ResponseBase<RegisterResponse>> {
     try {
       const response = await axiosInstance.post<ResponseBase<RegisterResponse>>('/auth/register/guardian', request);
-      return response.data;
+    return response.data;
     } catch (error: any) {
       // Handle validation errors (400 Bad Request) and duplicate resource errors (409 Conflict)
       if (error.response && error.response.data) {
@@ -110,8 +110,8 @@ export const authApi = {
    */
   async checkUsername(username: string): Promise<ResponseBase<boolean>> {
     try {
-      const response = await axiosInstance.get<ResponseBase<boolean>>(`/auth/check-username?username=${username}`);
-      return response.data;
+    const response = await axiosInstance.get<ResponseBase<boolean>>(`/auth/check-username?username=${username}`);
+    return response.data;
     } catch (error: any) {
       // Handle 409 Conflict (duplicate username) and 400 Bad Request (invalid format)
       if (error.response && error.response.data) {
@@ -136,8 +136,8 @@ export const authApi = {
    */
   async checkPhoneNumber(phoneNumber: string): Promise<ResponseBase<boolean>> {
     try {
-      const response = await axiosInstance.get<ResponseBase<boolean>>(`/auth/check-phone?phoneNumber=${phoneNumber}`);
-      return response.data;
+    const response = await axiosInstance.get<ResponseBase<boolean>>(`/auth/check-phone?phoneNumber=${phoneNumber}`);
+    return response.data;
     } catch (error: any) {
       // Handle 409 Conflict (duplicate phone) and 400 Bad Request (invalid format)
       if (error.response && error.response.data) {
